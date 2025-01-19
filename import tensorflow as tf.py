@@ -1,9 +1,7 @@
 import tensorflow as tf
 
 # Create a constant tensor
-hello = tf.constant('Hello, World!')
+hello = tf.constant('Hello, TensorFlow!')
 
-# Start a TensorFlow session
-with tf.Session() as sess:
-    # Run the tensor and print the result
-    print(sess.run(hello))
+# Print the tensor
+tf.print(hello)
