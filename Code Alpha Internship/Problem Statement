@@ -1,0 +1,42 @@
+Iris Flower Classification 
+
+Iris flower has three species; setosa,versicolor and virginica, which differs according to their measuements
+Now assume that you have the measurements of the iris flowers according to their species and here your task is to train a machine learning model that can learn from the measurements of the iris species and classify them
+Although the Scikit-learn library provides a dataset for iris flower classification, you can also download the same dataset from here. for the task of iris flower classification with machine learning,
+
+To download Iris flower classification. 
+- use datasets module provided by scikit learn. 
+- Install scikit-learn (pip install scikit-learn)
+- run the below given code 
+from sklearn.datasets import load_iris
+
+# Load the Iris dataset
+iris = load_iris()
+
+# Access the features and target
+X = iris.data
+y = iris.target
+
+# Print the shape of the dataset
+print(f"Features shape: {X.shape}")
+print(f"Target shape: {y.shape}")
+
+- Understand the dataset 
+Load_iris -> function returns a dictionary like object with several attributes like 
+data -> the feature of the dataset 
+target -> labels of the dataset
+feature_names -> the names of the features 
+target_names -> names of the target classes 
+DESCR -> description of the dataset 
+
+to access the attributes use below code
+
+# Print the feature names
+print("Feature names:", iris.feature_names)
+
+# Print the target names
+print("Target names:", iris.target_names)
+
+# Print the description of the dataset
+print("Dataset description:\n", iris.DESCR)
+
