@@ -14,5 +14,6 @@
             "password": "Uk@9994644495",
             "database": "dannys_diner"
         }
-    ]
+    ],
+    "python.REPL.enableREPLSmartSend": false
 }
