@@ -32,64 +32,63 @@ def scrape_batch(url_batch, username, password, chrome_binary_path, chromedriver
     from selenium.webdriver.support import expected_conditions as EC
     import time
     from bs4 import BeautifulSoup
+    import traceback
 
     options = webdriver.ChromeOptions()
     options.binary_location = chrome_binary_path
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--headless")  # Headless for speed
+    options.add_argument("--headless=new")  # Use new headless mode for Chrome v109+
 
     driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
     wait = WebDriverWait(driver, 15)
     results = []
     try:
+        print(f"[DEBUG] Batch size: {len(url_batch)} URLs. First URL: {url_batch[0]}")
         # Login ONCE per process
         driver.get(url_batch[0])
-        time.sleep(2)
-        login_hover_target = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div[2]/div/ul/li[1]/div/a/span')))
-        ActionChains(driver).move_to_element(login_hover_target).perform()
-        time.sleep(1)
-        wait.until(EC.presence_of_element_located((By.NAME, "loginheader"))).send_keys(username)
-        driver.find_element(By.NAME, "passwordheader").send_keys(password)
-        driver.find_element(By.XPATH, '//input[@type="submit"]').click()
-        time.sleep(3)
+        WebDriverWait(driver, 10).until(lambda d: d.title != "")
+        try:
+            login_hover_target = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div[2]/div/ul/li[1]/div/a/span')))
+            ActionChains(driver).move_to_element(login_hover_target).perform()
+            wait.until(EC.presence_of_element_located((By.NAME, "loginheader"))).send_keys(username)
+            driver.find_element(By.NAME, "passwordheader").send_keys(password)
+            driver.find_element(By.XPATH, '//input[@type="submit"]').click()
+            WebDriverWait(driver, 10).until(lambda d: "loginheader" not in d.page_source)
+            print(f"[DEBUG] Login submitted. Page title: {driver.title}")
+        except Exception as e:
+            print(f"[ERROR] Login step failed: {e}")
+            traceback.print_exc()
         # Scrape each URL in the batch
         for idx, url in enumerate(url_batch):
             start_time = time.time()
             driver.get(url)
-            time.sleep(2)
+            try:
+                WebDriverWait(driver, 10).until(lambda d: d.title != "")
+            except Exception:
+                print(f"[WARNING] Page did not load properly for {url}")
+            print(f"[DEBUG] Scraping URL: {url} | Title: {driver.title}")
             page_source = driver.page_source
+            if len(page_source) < 1000:
+                print(f"[WARNING] Page source is very short for {url} (length={len(page_source)}). Possible error.")
             if "loginheader" in page_source or "Username" in page_source:
                 print(f"⚠️ Login page detected at {url}. Skipping.")
                 continue
             soup = BeautifulSoup(page_source, 'html.parser')
-            # DEBUG: Print first 500 chars of HTML and all table/div rows for the first URL in the batch
-            if idx == 0:
-                print("\n[DEBUG] First 500 chars of HTML:\n", page_source[:500])
-                rows = soup.find_all(['tr', 'div'], class_=lambda x: x and ('row' in x or 'table-row' in x))
-                print(f"[DEBUG] Found {len(rows)} rows. Printing their text:")
-                for r in rows:
-                    print(r.get_text(" | ", strip=True))
-
-            # --- Extraction logic for Fundsquare ---
             # ISIN and Fund Name extraction (robust)
             isin = ''
             fund_name = ''
-            # Try to extract ISIN and fund name from <td> with bold <span>
             for td in soup.find_all('td'):
                 span = td.find('span', style=lambda s: s and 'font-weight: bold' in s)
                 if span:
                     span_text = span.text.strip()
-                    # ISIN pattern: starts with LU and is alphanumeric, else treat as missing
                     if span_text.startswith('LU') and len(span_text) > 8:
                         isin = span_text
                         fund_name = td.get_text(separator=' ', strip=True).replace(isin, '').strip()
                     else:
-                        # If span is present but not a valid ISIN, treat as fund name only
                         fund_name = td.get_text(separator=' ', strip=True).replace(span_text, '').strip()
-                    break  # Stop after first match
-            # Fallback: If fund name still not found, try <h1> or first non-empty <td>
+                    break
             if not fund_name:
                 h1 = soup.find('h1')
                 if h1:
@@ -227,8 +226,6 @@ def scrape_batch(url_batch, username, password, chrome_binary_path, chromedriver
             legal_advisor = extract_legal_advisor()
             last_nav = extract_last_nav()
             nav_calc_frequency = extract_nav_calc_frequency(driver, wait)
-
-            # --- Collect all data ---
             exec_time = round(time.time() - start_time, 2)
             results.append({
                 'URL': url,
@@ -247,8 +244,10 @@ def scrape_batch(url_batch, username, password, chrome_binary_path, chromedriver
                 'Execution time (s)': exec_time
             })
             print(f"✅ Scraped page for {url} in {exec_time}s.")
+        print(f"[DEBUG] Batch finished. Results in batch: {len(results)}")
     except Exception as e:
         print(f"❌ Error in batch: {e}")
+        traceback.print_exc()
     finally:
         driver.quit()
     return results
@@ -268,11 +267,13 @@ if __name__ == "__main__":
     num_processes = optimal_processes
     batch_size = 3  # Set to 3 URLs per batch for testing
     url_batches = [urls[i:i+batch_size] for i in range(0, len(urls), batch_size)]
+    print(f"[DEBUG] Total batches: {len(url_batches)}")
     with multiprocessing.Pool(processes=num_processes) as pool:
         all_results = pool.starmap(scrape_batch, [(batch, username, password, chrome_binary_path, chromedriver_path) for batch in url_batches])
 
     # Flatten results and save to CSV
     flat_results = [item for sublist in all_results for item in sublist]
+    print(f"[DEBUG] Total results scraped: {len(flat_results)}")
     if flat_results:
         pd.DataFrame(flat_results).to_csv("Fundsquare_Scrapped.csv", index=False)
         print("[INFO] Results saved to Fundsquare_Scrapped.csv")
