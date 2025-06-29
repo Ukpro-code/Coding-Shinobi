@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait # For waiting for elemen
 from selenium.webdriver.support import expected_conditions as EC # For waiting for elements to load and interact with them
 import pandas as pd # For reading Excel files
 import os # For checking file existence
+from multiprocessing import Pool
 
 start_time = time.time()  # Track total execution time
 
@@ -46,7 +47,7 @@ options.add_argument("--disable-dev-shm-usage") # Overcome limited resource prob
 options.add_argument("--disable-gpu") # Disable GPU hardware acceleration
 options.add_argument("--disable-software-rasterizer") # Disable software rasterizer
 options.add_argument("--remote-debugging-port=9222") # Enable remote debugging
-options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
+# options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
 
 # Check if Chromedriver exists
 if not os.path.exists(chromedriver_path):
@@ -108,6 +109,24 @@ def scrape_fund(driver, url):
     except Exception as e:
         logging.error(f"Error scraping {url}: {e}")
         return None
+
+def scrape_fund_wrapper(url):
+    # Set up Chrome options
+    options = webdriver.ChromeOptions() # Configure Chrome options
+    options.binary_location = chrome_binary_path # Set the path to the Chrome binary
+    options.add_argument("--no-sandbox") # Bypass OS security model
+    options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
+    options.add_argument("--disable-gpu") # Disable GPU hardware acceleration
+    options.add_argument("--disable-software-rasterizer") # Disable software rasterizer
+    options.add_argument("--remote-debugging-port=9222") # Enable remote debugging
+    options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
+
+    driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
+    wait = WebDriverWait(driver, 10)
+    data = scrape_fund(driver, url)
+    driver.quit()
+    return data
+
 # Main scraping workflow
 try:
     fund_data = []
@@ -143,3 +162,9 @@ finally:
         logging.error(f"Error closing driver: {quit_err}")
     total_exec_time = time.time() - start_time
     print(f"⏱️ Total execution time: {total_exec_time:.2f} seconds")
+
+if __name__ == "__main__":
+    with Pool(processes=4) as pool:  # Adjust number of processes as needed
+        results = pool.map(scrape_fund_wrapper, url_list)
+    df = pd.DataFrame(results)
+    df.to_csv("fundsquare_scraped_data.csv", index=False)
