@@ -1,3 +1,4 @@
+# Fundsquare.py
 import time # For time tracking
 from selenium import webdriver # For web automation
 from selenium.webdriver.common.by import By # For locating elements
@@ -7,8 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait # For waiting for elemen
 from selenium.webdriver.support import expected_conditions as EC # For waiting for elements to load and interact with them
 import pandas as pd # For reading Excel files
 import os # For checking file existence
-from multiprocessing import Pool
-
+import logging
 start_time = time.time()  # Track total execution time
 
 username = os.environ.get("FUNDSQUARE_USERNAME") # Your username for Fundsquare (set as environment variable)
@@ -39,44 +39,53 @@ try:
 except Exception as e:
     print(f"❌ Error reading Excel file: {e}")
     exit(1)
-# Set up Chrome options
-options = webdriver.ChromeOptions() # Configure Chrome options
-options.binary_location = chrome_binary_path # Set the path to the Chrome binary
-options.add_argument("--no-sandbox") # Bypass OS security model
-options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
-options.add_argument("--disable-gpu") # Disable GPU hardware acceleration
-options.add_argument("--disable-software-rasterizer") # Disable software rasterizer
-options.add_argument("--remote-debugging-port=9222") # Enable remote debugging
-# options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
+# Function to get Chrome options
+def get_chrome_options(headless=True):
+    options = webdriver.ChromeOptions()
+    options.binary_location = chrome_binary_path
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--remote-debugging-port=9222")
+    if headless:
+        options.add_argument("--headless")
+    return options
 
-# Check if Chromedriver exists
+options = get_chrome_options(headless=True)
+
+# driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
+# The driver will be created and managed in the __main__ block.
 if not os.path.exists(chromedriver_path):
     print(f"❌ Chromedriver not found at: {chromedriver_path}")
     exit(1)
 
 driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
-wait = WebDriverWait(driver, 10)
 
 # XPATH dictionary for scraping
+# WARNING: The XPATHs below are hardcoded and may break if the Fundsquare website structure changes.
+# To make the script more robust, consider moving these XPATHs to a separate configuration file (e.g., JSON or YAML)
+# and loading them at runtime. This allows easier updates if the site layout changes.
+# Example for loading from a JSON file:
+# import json
+# with open('fundsquare_xpaths.json', 'r') as f:
+#     XPATHS = json.load(f)
 XPATHS = {
     "Fund name": '//*[@id="content"]/table[1]/tbody/tr/td[1]/span',  # XPATH for fund name
     "ISIN": '//*[@id="content"]/table[1]/tbody/tr/td[2]/span',  # XPATH for ISIN (updated to likely correct location)
     "Last NAV": '//*[@id="content"]/table[2]/tbody/tr/td[2]', # XPATH for Last NAV
     "Fund creation date": '//*[@id="blocresume"]/table/tbody/tr/td[1]/table/tbody/tr[1]/td/div[3]/table/tbody/tr[6]/td[2]', # XPATH for Fund creation date
     "Promoter(s)": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[1]/td[2]', # XPATH for Promoter(s)
-    "Central administration": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[2]/td[2]', # XPATH for Central administration
-    "Management company": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[7]/td[2]', # XPATH for Management company
-    "Transfer agent": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[10]/td[2]/div', # XPATH for Transfer agent
-    "Custodian": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[12]/td[2]', # XPATH for Custodian
-    "Auditor": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[15]/td[2]', # XPATH for Auditor
-    "Legal advisor": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[16]/td[2]', # XPATH for Legal advisor
+    "Central administration": '//*[@id="blocresume"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td/div[3]/table/tbody/tr[2]/td[2]' # XPATH for Central administration
 }
-
-import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
-
 # Function to log in to Fundsquare
 def login(driver):
+    """
+    Logs into the Fundsquare website using the provided Selenium WebDriver instance.
+    Navigates to the first URL in url_list, performs the login sequence, and waits for the login to complete.
+    Exits the script if login fails.
+    """
+    wait = WebDriverWait(driver, 10)
     driver.get(url_list[0])
     try:
         login_hover_target = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div[2]/div/ul/li[1]/div/a/span')))
@@ -90,8 +99,19 @@ def login(driver):
         print(f"❌ Login failed: {e}")
         driver.quit()
         exit(1)
-
 def scrape_fund(driver, url):
+def scrape_fund(driver, url):
+    """
+    Scrapes fund data from a given Fundsquare URL using the provided Selenium WebDriver instance.
+
+    Args:
+        driver (webdriver.Chrome): The Selenium WebDriver instance.
+        url (str): The Fundsquare URL to scrape.
+
+    Returns:
+        dict or None: A dictionary containing scraped fund data if successful, otherwise None.
+    """
+    wait = WebDriverWait(driver, 10)
     data = {"URL": url}
     driver.get(url)
     try:
@@ -103,46 +123,61 @@ def scrape_fund(driver, url):
                 data[key] = element.text
             except Exception as e:
                 logging.warning(f"Could not find {key} at {url}: {e}")
-                data[key] = ""
         # logging.info(f"Scraped data: {data}")  # Use logging if needed
         return data
     except Exception as e:
         logging.error(f"Error scraping {url}: {e}")
         return None
+    fund_data = []
+    try:
+        if url_list:
+            login(driver)  # Perform login before scraping
+            for url in url_list:
+                url_start = time.time()
+                data = scrape_fund(driver, url)
+                if data:
+                    data["Exec_time"] = round(time.time() - url_start, 2)
+                    fund_data.append(data)
+                    logging.info(f"Scraped data for: {data.get('Fund name', url)} (Exec_time: {data['Exec_time']}s)")
+                else:
+                    logging.warning(f"Failed to scrape data for: {url}")
+        else:
+            logging.error("url_list is empty. Please check the Excel file and column name.")
 
-def scrape_fund_wrapper(url):
-    # Set up Chrome options
-    options = webdriver.ChromeOptions() # Configure Chrome options
-    options.binary_location = chrome_binary_path # Set the path to the Chrome binary
-    options.add_argument("--no-sandbox") # Bypass OS security model
-    options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
-    options.add_argument("--disable-gpu") # Disable GPU hardware acceleration
-    options.add_argument("--disable-software-rasterizer") # Disable software rasterizer
-    options.add_argument("--remote-debugging-port=9222") # Enable remote debugging
-    options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
+        if fund_data:
+            df_out = pd.DataFrame(fund_data)
+            df_out.to_csv("fundsquare_scraped_data.csv", index=False)
+            print("✅ Data saved to fundsquare_scraped_data.csv")
+        else:
+            logging.warning("No data scraped. Nothing to save.")
+
+    except Exception as main_err:
+        logging.error(f"Error in main scraping workflow: {main_err}")
+        try:
+            driver.quit()
+            print("✅ Driver closed successfully.")
+        except Exception as quit_err:
+            logging.error(f"Error closing driver: {quit_err}")
+if __name__ == "__main__":
+    # Sequential scraping using a single driver instance to avoid resource exhaustion
+    options = webdriver.ChromeOptions()  # Ensure options is defined in this scope
+if __name__ == "__main__":
+    # Sequential scraping using a single driver instance to avoid resource exhaustion
+    options = get_chrome_options(headless=False)  # Set headless as needed
 
     driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
     wait = WebDriverWait(driver, 10)
-    data = scrape_fund(driver, url)
-    driver.quit()
-    return data
-
-# Main scraping workflow
-try:
     fund_data = []
-    if url_list:
-        login(driver)  # Perform login before scraping
-        for url in url_list:
-            url_start = time.time()
-            data = scrape_fund(driver, url)
-            if data:
-                data["Exec_time"] = round(time.time() - url_start, 2)
-                fund_data.append(data)
-                logging.info(f"Scraped data for: {data.get('Fund name', url)} (Exec_time: {data['Exec_time']}s)")
-            else:
-                logging.warning(f"Failed to scrape data for: {url}")
-    else:
-        logging.error("url_list is empty. Please check the Excel file and column name.")
+    login(driver)  # Perform login before scraping
+    for url in url_list:
+        url_start = time.time()
+        data = scrape_fund(driver, url)
+        if data:
+            data["Exec_time"] = round(time.time() - url_start, 2)
+            fund_data.append(data)
+            logging.info(f"Scraped data for: {data.get('Fund name', url)} (Exec_time: {data['Exec_time']}s)")
+        else:
+            logging.warning(f"Failed to scrape data for: {url}")
 
     if fund_data:
         df_out = pd.DataFrame(fund_data)
@@ -151,20 +186,10 @@ try:
     else:
         logging.warning("No data scraped. Nothing to save.")
 
-except Exception as main_err:
-    logging.error(f"Error in main scraping workflow: {main_err}")
-
-finally:
-    try:
-        if 'driver' in locals() and driver is not None:
-            driver.quit()
-    except Exception as quit_err:
-        logging.error(f"Error closing driver: {quit_err}")
     total_exec_time = time.time() - start_time
     print(f"⏱️ Total execution time: {total_exec_time:.2f} seconds")
-
-if __name__ == "__main__":
-    with Pool(processes=4) as pool:  # Adjust number of processes as needed
-        results = pool.map(scrape_fund_wrapper, url_list)
-    df = pd.DataFrame(results)
-    df.to_csv("fundsquare_scraped_data.csv", index=False)
+    driver.quit()
+    print("✅ Driver closed successfully.")
+else:
+    print("This script is intended to be run as a standalone program.")
+    print("Please run it directly to execute the scraping process.")
