@@ -303,3 +303,218 @@ User 3 → Signs in with their Google Account → Sees their calendar
 - Automatic periodic sync
 - Calendar selection interface
 - Event categories and colors
+
+---
+
+## ⚠️ **Common Mistakes to Avoid**
+
+### **1. OAuth Configuration Errors**
+
+#### **❌ Wrong Application Type**
+- **Mistake**: Choosing "Desktop application" instead of "Web application"
+- **Problem**: OAuth flow won't work properly with Flask web app
+- **Solution**: Always choose "Web application" for Flask apps
+
+#### **❌ Incorrect JavaScript Origins**
+```
+❌ Wrong: http://localhost:5000/calendar
+❌ Wrong: localhost:5000
+❌ Wrong: https://localhost:5000 (for local dev)
+✅ Correct: http://localhost:5000 (for local dev)
+✅ Correct: https://yourdomain.com (for production)
+```
+
+#### **❌ Missing or Wrong Redirect URIs**
+```
+❌ Wrong: http://localhost:5000
+❌ Wrong: http://localhost:5000/auth
+❌ Wrong: http://localhost:5000/callback
+✅ Correct: http://localhost:5000/oauth2callback
+```
+
+### **2. File Setup Errors**
+
+#### **❌ Wrong Credentials File Structure**
+- **Mistake**: Using "installed" instead of "web" in credentials.json
+- **Problem**: Happens when you accidentally choose "Desktop application"
+- **Solution**: Re-create credentials as "Web application"
+
+```json
+❌ Wrong (Desktop app structure):
+{
+  "installed": {
+    "client_id": "...",
+    "redirect_uris": ["http://localhost"]
+  }
+}
+
+✅ Correct (Web app structure):
+{
+  "web": {
+    "client_id": "...",
+    "redirect_uris": ["http://localhost:5000/oauth2callback"]
+  }
+}
+```
+
+#### **❌ Wrong File Names or Locations**
+```
+❌ Wrong: client_secret.json
+❌ Wrong: oauth_credentials.json
+❌ Wrong: putting file in Downloads folder
+✅ Correct: credentials.json (in same directory as app.py)
+```
+
+### **3. Authentication Flow Errors**
+
+#### **❌ Skipping OAuth Consent Screen Setup**
+- **Mistake**: Not configuring the OAuth consent screen
+- **Problem**: Users see "This app isn't verified" error
+- **Solution**: Complete OAuth consent screen configuration
+
+#### **❌ Wrong User Type Selection**
+```
+❌ Wrong: Internal (only for Google Workspace organizations)
+✅ Correct: External (allows any Google user)
+```
+
+### **4. Port and URL Mismatches**
+
+#### **❌ Running Flask on Different Port**
+- **Mistake**: Flask runs on port 5001 but OAuth configured for 5000
+- **Problem**: Redirect URI mismatch error
+- **Solution**: Either:
+  - Change Flask to run on port 5000: `app.run(port=5000)`
+  - Or update OAuth settings to match your port
+
+#### **❌ HTTP vs HTTPS Confusion**
+```
+Local Development:
+❌ Wrong: https://localhost:5000
+✅ Correct: http://localhost:5000
+
+Production:
+❌ Wrong: http://yourdomain.com
+✅ Correct: https://yourdomain.com
+```
+
+### **5. Environment and Dependencies**
+
+#### **❌ Missing Required Packages**
+- **Mistake**: Not installing Google API libraries
+- **Problem**: Import errors when running the app
+- **Solution**: Run `pip install -r requirements.txt`
+
+#### **❌ Python Version Issues**
+- **Mistake**: Using Python 2.7 or very old Python 3 versions
+- **Problem**: Compatibility issues with Google libraries
+- **Solution**: Use Python 3.7+ (recommended: Python 3.9+)
+
+### **6. Scope and Permissions**
+
+#### **❌ Insufficient Calendar Permissions**
+- **Mistake**: Using read-only scope when app needs write access
+- **Problem**: Can't create events in Google Calendar
+- **Solution**: Use full calendar scope: `https://www.googleapis.com/auth/calendar`
+
+#### **❌ Not Understanding Multi-User Privacy**
+- **Mistake**: Worrying that users will see each other's calendars
+- **Reality**: Each user only sees their own calendar data
+- **Google OAuth handles user separation automatically**
+
+### **7. Testing and Debugging**
+
+#### **❌ Not Testing Authentication Flow**
+- **Mistake**: Assuming OAuth works without testing
+- **Problem**: Users can't authenticate
+- **Solution**: Test the complete flow:
+  1. Click "Sync Google Calendar"
+  2. Sign in with Google
+  3. Grant permissions
+  4. Verify events appear
+
+#### **❌ Ignoring Browser Console Errors**
+- **Mistake**: Not checking browser developer tools
+- **Problem**: JavaScript errors prevent OAuth flow
+- **Solution**: Press F12, check Console tab for errors
+
+### **8. Production Deployment Mistakes**
+
+#### **❌ Using localhost URLs in Production**
+- **Mistake**: Forgetting to update OAuth settings for production
+- **Problem**: OAuth fails in production
+- **Solution**: Update both JavaScript Origins and Redirect URIs
+
+#### **❌ Not Using HTTPS in Production**
+- **Mistake**: Using HTTP for production OAuth
+- **Problem**: Google requires HTTPS for OAuth in production
+- **Solution**: Set up SSL certificate and use HTTPS
+
+#### **❌ Hardcoding Credentials**
+- **Mistake**: Putting credentials directly in code
+- **Problem**: Security risk, credentials exposed
+- **Solution**: Use environment variables or config files
+
+### **9. Multi-User Deployment Mistakes**
+
+#### **❌ Creating Separate Credentials for Each User**
+- **Mistake**: Thinking you need separate OAuth apps for each user
+- **Reality**: One OAuth app serves unlimited users
+- **Solution**: Use single OAuth app, users authenticate individually
+
+#### **❌ Not Setting Up Privacy Policy**
+- **Mistake**: Skipping privacy policy for public apps
+- **Problem**: Google may restrict your app
+- **Solution**: Create privacy policy and add to OAuth consent screen
+
+### **10. File Security Mistakes**
+
+#### **❌ Committing Credentials to Git**
+- **Mistake**: Adding credentials.json and token.json to version control
+- **Problem**: Security risk, credentials exposed publicly
+- **Solution**: Add to .gitignore:
+```
+credentials.json
+token.json
+*.json
+```
+
+#### **❌ Sharing Credentials Files**
+- **Mistake**: Sharing credentials.json with others
+- **Problem**: Security risk, unauthorized access
+- **Solution**: Each deployment needs its own credentials
+
+### **Quick Checklist to Avoid Mistakes:**
+
+✅ **Before Starting:**
+- [ ] Choose "Web application" (not Desktop)
+- [ ] Have Python 3.7+ installed
+- [ ] Have Flask app ready to test
+
+✅ **During Setup:**
+- [ ] JavaScript Origins: `http://localhost:5000`
+- [ ] Redirect URIs: `http://localhost:5000/oauth2callback`
+- [ ] OAuth consent screen configured
+- [ ] User Type: External
+
+✅ **After Setup:**
+- [ ] credentials.json in correct location
+- [ ] File has "web" structure (not "installed")
+- [ ] Test authentication flow completely
+- [ ] Check browser console for errors
+
+✅ **For Production:**
+- [ ] Update URLs to production domain
+- [ ] Use HTTPS
+- [ ] Set up privacy policy
+- [ ] Use environment variables for credentials
+
+### **When Things Go Wrong:**
+
+1. **"This app isn't verified"** → Complete OAuth consent screen
+2. **"Redirect URI mismatch"** → Check JavaScript Origins and Redirect URIs
+3. **"Invalid client"** → Check credentials.json structure
+4. **"Access denied"** → User needs to grant permissions
+5. **"Token expired"** → Delete token.json and re-authenticate
+
+**Remember**: Most issues are configuration problems, not code problems!
