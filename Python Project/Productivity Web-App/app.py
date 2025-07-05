@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
-import os
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -123,7 +122,6 @@ def home():
         google_today_events = []
         if GOOGLE_CALENDAR_ENABLED and google_calendar:
             try:
-                from datetime import timedelta
                 today_start = datetime.combine(today, datetime.min.time())
                 today_end = datetime.combine(today, datetime.max.time())
                 
