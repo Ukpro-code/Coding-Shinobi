@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #181825;
+            color: #f3f3f3;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 32px;
+            background: #232336;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #7f5af0;
+        }
+        nav a {
+            color: #f3f3f3;
+            text-decoration: none;
+            margin-left: 28px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #7f5af0;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 28px;
+        }
+        .card {
+            background: #28294a;
+            border-radius: 14px;
+            padding: 28px 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-height: 180px;
+        }
+        .card h2 {
+            margin: 0 0 12px 0;
+            font-size: 1.3rem;
+            color: #7f5af0;
+        }
+        .card p {
+            margin: 0;
+            color: #b3b3b3;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f5af0;
+            font-size: 1rem;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 12px; }
+            .dashboard { gap: 14px; }
+            .card { padding: 16px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Productivity Dashboard</div>
+            <nav>
+                <a href="#">Home</a>
+                <a href="#">Tasks</a>
+                <a href="#">Journal</a>
+                <a href="#">Goals</a>
+                <a href="#">AI Assistant</a>
+            </nav>
+        </header>
+        <div class="dashboard">
+            <div class="card">
+                <h2>Today's Tasks</h2>
+                <p>Stay on top of your to-do list and track your progress.</p>
+            </div>
+            <div class="card">
+                <h2>Calendar</h2>
+                <p>View your schedule and upcoming events at a glance.</p>
+            </div>
+            <div class="card">
+                <h2>Journal</h2>
+                <p>Reflect on your day and jot down your thoughts.</p>
+            </div>
+            <div class="card">
+                <h2>Goals</h2>
+                <p>Set, track, and achieve your personal and professional goals.</p>
+            </div>
+            <div class="card">
+                <h2>Vision Board</h2>
+                <p>Visualize your dreams and stay inspired every day.</p>
+            </div>
+            <div class="card">
+                <h2>Pomodoro Timer</h2>
+                <p>Boost your focus with the Pomodoro technique.</p>
+            </div>
+            <div class="card">
+                <h2>Lofi Music</h2>
+                <p>Listen to relaxing Lofi beats while you work.</p>
+            </div>
+            <div class="card">
+                <h2>AI Assistant</h2>
+                <p>Get smart suggestions, summaries, and more with AI.</p>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; 2025 Productivity Dashboard. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
