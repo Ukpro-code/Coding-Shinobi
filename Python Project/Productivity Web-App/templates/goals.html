@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Goals - Productivity Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2><i class="fas fa-bullseye me-2"></i>Goals</h2>
+            <a href="{{ url_for('add_goal') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Goal
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-target me-2"></i>Your Goals
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if goals %}
+                    <div class="row">
+                        {% for goal in goals %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-{{ 'success' if goal.status == 'completed' else 'primary' if goal.status == 'active' else 'secondary' }}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ goal.title }}</h6>
+                                        <small class="text-muted">{{ goal.goal_type.title() }} Goal</small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-{{ 'success' if goal.status == 'completed' else 'primary' if goal.status == 'active' else 'secondary' }} me-2">
+                                            {{ goal.status.title() }}
+                                        </span>
+                                        {% if goal.days_remaining > 0 %}
+                                            <span class="badge bg-warning">{{ goal.days_remaining }} days left</span>
+                                        {% elif goal.days_remaining == 0 %}
+                                            <span class="badge bg-danger">Due today!</span>
+                                        {% else %}
+                                            <span class="badge bg-dark">Overdue</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    {% if goal.description %}
+                                        <p class="card-text">{{ goal.description }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">Progress</small>
+                                            <small class="text-muted">{{ goal.progress }}%</small>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-{{ 'success' if goal.progress >= 75 else 'warning' if goal.progress >= 50 else 'info' if goal.progress >= 25 else 'danger' }}" 
+                                                 style="width: {{ goal.progress }}%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Target: {{ goal.target_date.strftime('%B %d, %Y') }}</small>
+                                        <div class="btn-group btn-group-sm">
+                                            <form method="POST" action="{{ url_for('update_goal_progress', goal_id=goal.id) }}" style="display: inline;">
+                                                <input type="number" name="progress" class="form-control form-control-sm" 
+                                                       value="{{ goal.progress }}" min="0" max="100" step="5" 
+                                                       style="width: 80px; display: inline-block;" 
+                                                       onchange="this.form.submit()">
+                                            </form>
+                                            <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this goal?')">
+                                                <button type="submit" class="btn btn-danger btn-sm ms-2">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
+                        <h4>No goals set yet</h4>
+                        <p class="text-muted">Set your first goal and start achieving your dreams!</p>
+                        <a href="{{ url_for('add_goal') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Set Your First Goal
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Goal Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ goals|length }}</h3>
+                <p class="text-muted mb-0">Total Goals</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-success">{{ goals|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+                <p class="text-muted mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-info">{{ goals|selectattr('status', 'equalto', 'active')|list|length }}</h3>
+                <p class="text-muted mb-0">Active</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-warning">{{ (goals|sum(attribute='progress') / goals|length)|round(1) if goals else 0 }}%</h3>
+                <p class="text-muted mb-0">Avg Progress</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
