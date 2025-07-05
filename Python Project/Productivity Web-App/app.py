@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 
@@ -323,6 +323,7 @@ def add_event():
             description = request.form.get('description')
             start_date_str = request.form.get('start_date')
             end_date_str = request.form.get('end_date')
+            add_to_google = request.form.get('add_to_google') == 'true'
             
             if not title or not start_date_str:
                 flash('Event title and start date are required!', 'error')
@@ -332,7 +333,10 @@ def add_event():
             end_date = None
             if end_date_str:
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M')
+            else:
+                end_date = start_date + timedelta(hours=1)  # Default 1 hour duration
             
+            # Create local event
             event = Event(
                 title=title,
                 description=description,
@@ -342,7 +346,22 @@ def add_event():
             
             db.session.add(event)
             db.session.commit()
-            flash('Event added successfully!', 'success')
+            
+            # Also create in Google Calendar if requested
+            if add_to_google and GOOGLE_CALENDAR_ENABLED and google_calendar:
+                try:
+                    success, message = google_calendar.create_event(
+                        title, description or '', start_date, end_date
+                    )
+                    if success:
+                        flash('Event added to both local calendar and Google Calendar!', 'success')
+                    else:
+                        flash(f'Event added locally, but Google Calendar failed: {message}', 'warning')
+                except Exception as google_error:
+                    flash(f'Event added locally, but Google Calendar error: {str(google_error)}', 'warning')
+            else:
+                flash('Event added successfully!', 'success')
+                
             return redirect(url_for('calendar'))
             
         except Exception as e:
@@ -350,7 +369,7 @@ def add_event():
             flash(f'Error adding event: {str(e)}', 'error')
             return redirect(url_for('add_event'))
     
-    return render_template('add_event.html')
+    return render_template('add_event.html', google_calendar_enabled=GOOGLE_CALENDAR_ENABLED)
 
 @app.route('/analytics')
 def analytics():
@@ -459,153 +478,115 @@ def create_google_event():
             'message': str(e)
         }), 500
 
-# Journal Routes
-@app.route('/journal')
-def journal():
-    try:
-        entries = JournalEntry.query.order_by(JournalEntry.created_at.desc()).all()
-        return render_template('journal.html', entries=entries)
-    except Exception as e:
-        flash(f'Error loading journal: {str(e)}', 'error')
-        return render_template('journal.html', entries=[])
-
-@app.route('/journal/add', methods=['GET', 'POST'])
-def add_journal_entry():
-    if request.method == 'POST':
-        try:
-            title = request.form.get('title')
-            content = request.form.get('content')
-            entry_type = request.form.get('entry_type', 'general')
-            mood = request.form.get('mood')
-            
-            if not content:
-                flash('Journal content is required!', 'error')
-                return redirect(url_for('add_journal_entry'))
-            
-            entry = JournalEntry(
-                title=title,
-                content=content,
-                entry_type=entry_type,
-                mood=mood
-            )
-            
-            db.session.add(entry)
-            db.session.commit()
-            flash('Journal entry added successfully!', 'success')
-            return redirect(url_for('journal'))
-            
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error adding journal entry: {str(e)}', 'error')
-            return redirect(url_for('add_journal_entry'))
+@app.route('/calendar/google/create-task', methods=['POST'])
+def create_google_task_event():
+    """Create a Google Calendar event from a task"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        return jsonify({'error': 'Google Calendar not enabled'}), 400
     
-    return render_template('add_journal_entry.html')
-
-@app.route('/journal/<int:entry_id>/delete', methods=['POST'])
-def delete_journal_entry(entry_id):
     try:
-        entry = JournalEntry.query.get_or_404(entry_id)
-        db.session.delete(entry)
-        db.session.commit()
-        flash('Journal entry deleted successfully!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error deleting journal entry: {str(e)}', 'error')
-    
-    return redirect(url_for('journal'))
-
-# Goals Routes
-@app.route('/goals')
-def goals():
-    try:
-        goals = Goal.query.order_by(Goal.target_date.asc()).all()
-        return render_template('goals.html', goals=goals)
-    except Exception as e:
-        flash(f'Error loading goals: {str(e)}', 'error')
-        return render_template('goals.html', goals=[])
-
-@app.route('/goals/add', methods=['GET', 'POST'])
-def add_goal():
-    if request.method == 'POST':
-        try:
-            title = request.form.get('title')
-            description = request.form.get('description')
-            goal_type = request.form.get('goal_type', 'monthly')
-            target_date_str = request.form.get('target_date')
-            
-            if not title or not target_date_str:
-                flash('Goal title and target date are required!', 'error')
-                return redirect(url_for('add_goal'))
-            
-            target_date = datetime.strptime(target_date_str, '%Y-%m-%d')
-            
-            goal = Goal(
-                title=title,
-                description=description,
-                goal_type=goal_type,
-                target_date=target_date
-            )
-            
-            db.session.add(goal)
-            db.session.commit()
-            flash('Goal added successfully!', 'success')
-            return redirect(url_for('goals'))
-            
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error adding goal: {str(e)}', 'error')
-            return redirect(url_for('add_goal'))
-    
-    return render_template('add_goal.html')
-
-@app.route('/goals/<int:goal_id>/update', methods=['POST'])
-def update_goal_progress(goal_id):
-    try:
-        goal = Goal.query.get_or_404(goal_id)
-        new_progress = float(request.form.get('progress', 0))
+        data = request.get_json()
+        task_title = data.get('title')
+        task_description = data.get('description', '')
+        due_date = datetime.fromisoformat(data.get('due_date'))
+        priority = data.get('priority', 'medium')
         
-        if 0 <= new_progress <= 100:
-            goal.progress = new_progress
-            if new_progress >= 100:
-                goal.status = 'completed'
-            goal.updated_at = datetime.utcnow()
-            db.session.commit()
-            flash('Goal progress updated!', 'success')
+        success, message = google_calendar.create_task_event(
+            task_title, task_description, due_date, priority
+        )
+        
+        return jsonify({
+            'success': success,
+            'message': message
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+@app.route('/calendar/google/create-meeting', methods=['POST'])
+def create_google_meeting():
+    """Create a meeting event in Google Calendar"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        return jsonify({'error': 'Google Calendar not enabled'}), 400
+    
+    try:
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description', '')
+        start_datetime = datetime.fromisoformat(data.get('start_datetime'))
+        end_datetime = datetime.fromisoformat(data.get('end_datetime'))
+        location = data.get('location', '')
+        attendees = data.get('attendees', [])
+        
+        success, message = google_calendar.create_meeting_event(
+            title, description, start_datetime, end_datetime, location, attendees
+        )
+        
+        return jsonify({
+            'success': success,
+            'message': message
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+@app.route('/tasks/<int:task_id>/add-to-google-calendar', methods=['POST'])
+def add_task_to_google_calendar(task_id):
+    """Add a task as an event to Google Calendar"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        flash('Google Calendar integration is not enabled', 'error')
+        return redirect(url_for('tasks'))
+    
+    try:
+        task = Task.query.get_or_404(task_id)
+        
+        if not task.due_date:
+            flash('Task must have a due date to add to Google Calendar', 'error')
+            return redirect(url_for('tasks'))
+        
+        success, message = google_calendar.create_task_event(
+            task.title, task.description or '', task.due_date, task.priority
+        )
+        
+        if success:
+            flash('Task added to Google Calendar successfully!', 'success')
         else:
-            flash('Progress must be between 0 and 100!', 'error')
+            flash(f'Failed to add task to Google Calendar: {message}', 'error')
             
     except Exception as e:
-        db.session.rollback()
-        flash(f'Error updating goal: {str(e)}', 'error')
+        flash(f'Error adding task to Google Calendar: {str(e)}', 'error')
     
-    return redirect(url_for('goals'))
+    return redirect(url_for('tasks'))
 
-@app.route('/goals/<int:goal_id>/delete', methods=['POST'])
-def delete_goal(goal_id):
-    try:
-        goal = Goal.query.get_or_404(goal_id)
-        db.session.delete(goal)
-        db.session.commit()
-        flash('Goal deleted successfully!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error deleting goal: {str(e)}', 'error')
+@app.route('/events/<int:event_id>/add-to-google-calendar', methods=['POST'])
+def add_event_to_google_calendar(event_id):
+    """Add a local event to Google Calendar"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        flash('Google Calendar integration is not enabled', 'error')
+        return redirect(url_for('calendar'))
     
-    return redirect(url_for('goals'))
-
-@app.route('/api/tasks')
-def api_tasks():
     try:
-        tasks = Task.query.all()
-        return jsonify([{
-            'id': task.id,
-            'title': task.title,
-            'status': task.status,
-            'priority': task.priority,
-            'created_at': task.created_at.isoformat()
-        } for task in tasks])
+        event = Event.query.get_or_404(event_id)
+        
+        end_datetime = event.end_date or (event.start_date + timedelta(hours=1))
+        
+        success, message = google_calendar.create_event(
+            event.title, event.description or '', event.start_date, end_datetime
+        )
+        
+        if success:
+            flash('Event added to Google Calendar successfully!', 'success')
+        else:
+            flash(f'Failed to add event to Google Calendar: {message}', 'error')
+            
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        flash(f'Error adding event to Google Calendar: {str(e)}', 'error')
+    
+    return redirect(url_for('calendar'))
 
 # Database initialization
 def create_tables():

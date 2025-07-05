@@ -7,8 +7,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from datetime import datetime, timedelta
 
-# Scopes for Google Calendar API
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+# Scopes for Google Calendar API - Updated for read/write access
+SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 class GoogleCalendarService:
     def __init__(self):
@@ -131,31 +131,132 @@ class GoogleCalendarService:
         except HttpError as error:
             return False, f"An error occurred: {error}"
     
-    def get_calendars(self):
-        """Get list of available calendars"""
+    def create_task_event(self, task_title, task_description, due_date, priority='medium'):
+        """Create a Google Calendar event from a task"""
         if not self.service:
             success, message = self.authenticate()
             if not success:
-                return None, message
+                return False, message
         
         try:
-            calendars_result = self.service.calendarList().list().execute()
-            calendars = calendars_result.get('items', [])
+            # Create event for task due date
+            event_title = f"📋 Task: {task_title}"
+            event_description = f"Task Description: {task_description}\n\nPriority: {priority.title()}\n\nCreated from Productivity Dashboard"
             
-            formatted_calendars = []
-            for calendar in calendars:
-                formatted_calendars.append({
-                    'id': calendar['id'],
-                    'name': calendar['summary'],
-                    'primary': calendar.get('primary', False),
-                    'access_role': calendar.get('accessRole', ''),
-                    'color': calendar.get('backgroundColor', '#3174ad')
-                })
+            # Set event duration (1 hour for task)
+            start_time = due_date
+            end_time = due_date + timedelta(hours=1)
             
-            return formatted_calendars, "Successfully retrieved calendars"
+            event = {
+                'summary': event_title,
+                'description': event_description,
+                'start': {
+                    'dateTime': start_time.isoformat(),
+                    'timeZone': 'UTC',
+                },
+                'end': {
+                    'dateTime': end_time.isoformat(),
+                    'timeZone': 'UTC',
+                },
+                'colorId': '1' if priority == 'high' else '2' if priority == 'medium' else '3',  # Color coding
+                'reminders': {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'popup', 'minutes': 60},  # 1 hour reminder
+                        {'method': 'popup', 'minutes': 10},  # 10 minute reminder
+                    ],
+                },
+            }
+            
+            event = self.service.events().insert(calendarId='primary', body=event).execute()
+            return True, f"Task event created: {event.get('htmlLink')}"
             
         except HttpError as error:
-            return None, f"An error occurred: {error}"
+            return False, f"An error occurred: {error}"
+    
+    def create_meeting_event(self, title, description, start_datetime, end_datetime, location=None, attendees=None):
+        """Create a meeting event in Google Calendar"""
+        if not self.service:
+            success, message = self.authenticate()
+            if not success:
+                return False, message
+        
+        try:
+            event = {
+                'summary': f"🤝 Meeting: {title}",
+                'description': description,
+                'start': {
+                    'dateTime': start_datetime.isoformat(),
+                    'timeZone': 'UTC',
+                },
+                'end': {
+                    'dateTime': end_datetime.isoformat(),
+                    'timeZone': 'UTC',
+                },
+                'colorId': '4',  # Meeting color
+                'reminders': {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'popup', 'minutes': 15},  # 15 minute reminder
+                        {'method': 'email', 'minutes': 60},  # 1 hour email reminder
+                    ],
+                },
+            }
+            
+            if location:
+                event['location'] = location
+            
+            if attendees:
+                event['attendees'] = [{'email': email} for email in attendees]
+            
+            event = self.service.events().insert(calendarId='primary', body=event).execute()
+            return True, f"Meeting created: {event.get('htmlLink')}"
+            
+        except HttpError as error:
+            return False, f"An error occurred: {error}"
+    
+    def update_event(self, event_id, title=None, description=None, start_datetime=None, end_datetime=None, location=None):
+        """Update an existing event in Google Calendar"""
+        if not self.service:
+            success, message = self.authenticate()
+            if not success:
+                return False, message
+        
+        try:
+            # Get the existing event
+            event = self.service.events().get(calendarId='primary', eventId=event_id).execute()
+            
+            # Update fields if provided
+            if title:
+                event['summary'] = title
+            if description:
+                event['description'] = description
+            if start_datetime:
+                event['start']['dateTime'] = start_datetime.isoformat()
+            if end_datetime:
+                event['end']['dateTime'] = end_datetime.isoformat()
+            if location:
+                event['location'] = location
+            
+            updated_event = self.service.events().update(calendarId='primary', eventId=event_id, body=event).execute()
+            return True, f"Event updated: {updated_event.get('htmlLink')}"
+            
+        except HttpError as error:
+            return False, f"An error occurred: {error}"
+    
+    def delete_event(self, event_id):
+        """Delete an event from Google Calendar"""
+        if not self.service:
+            success, message = self.authenticate()
+            if not success:
+                return False, message
+        
+        try:
+            self.service.events().delete(calendarId='primary', eventId=event_id).execute()
+            return True, "Event deleted successfully"
+            
+        except HttpError as error:
+            return False, f"An error occurred: {error}"
 
 # Global instance
 google_calendar = GoogleCalendarService()

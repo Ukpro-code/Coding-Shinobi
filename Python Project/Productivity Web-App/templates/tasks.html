@@ -82,6 +82,15 @@
                                                     <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
                                                 </select>
                                             </form>
+                                            
+                                            {% if task.due_date %}
+                                            <form method="POST" action="{{ url_for('add_task_to_google_calendar', task_id=task.id) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-primary btn-sm me-1" title="Add to Google Calendar">
+                                                    <i class="fab fa-google"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                            
                                             <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this task?')">
                                                 <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="fas fa-trash"></i>

@@ -1,0 +1,217 @@
+API ENDPOINTS EXPLANATION - SIMPLE TEXT VERSION
+===============================================
+
+WHAT ARE API ENDPOINTS?
+======================
+API Endpoints are specific URLs in your web app that handle different requests.
+Think of them as "doors" that connect your app to Google Calendar.
+
+YOUR APP'S API ENDPOINTS:
+========================
+
+1. CALENDAR SYNC ENDPOINTS
+---------------------------
+
+GET /calendar/sync
+- URL: http://127.0.0.1:5000/calendar/sync
+- Purpose: Manual sync with Google Calendar
+- What happens: User clicks "Sync Google Calendar" button
+- Result: App fetches latest events from Google Calendar
+
+GET /calendar/google/events
+- URL: http://127.0.0.1:5000/calendar/google/events
+- Purpose: Get Google Calendar events as JSON data
+- What happens: Background data loading without page refresh
+- Result: Returns calendar events in JSON format
+
+2. EVENT CREATION ENDPOINTS
+----------------------------
+
+POST /calendar/google/create
+- URL: http://127.0.0.1:5000/calendar/google/create
+- Purpose: Create basic event in Google Calendar
+- Input: Event title, description, start/end times, location
+- Result: New event appears in Google Calendar
+
+POST /calendar/google/create-task
+- URL: http://127.0.0.1:5000/calendar/google/create-task
+- Purpose: Convert task to calendar event
+- Input: Task title, description, due date, priority
+- Result: Task appears as calendar event with priority colors and reminders
+
+POST /calendar/google/create-meeting
+- URL: http://127.0.0.1:5000/calendar/google/create-meeting
+- Purpose: Create meeting with attendees
+- Input: Meeting details, attendees, location
+- Result: Meeting created with invitations sent to attendees
+
+3. INTEGRATION ENDPOINTS
+-------------------------
+
+POST /tasks/{id}/add-to-google-calendar
+- URL: http://127.0.0.1:5000/tasks/123/add-to-google-calendar
+- Purpose: Add existing task to Google Calendar
+- What happens: User clicks Google button next to task
+- Result: Task becomes calendar event
+
+POST /events/{id}/add-to-google-calendar
+- URL: http://127.0.0.1:5000/events/456/add-to-google-calendar
+- Purpose: Add local event to Google Calendar
+- What happens: User clicks button to sync local event
+- Result: Event appears in both local and Google Calendar
+
+HOW THEY WORK - STEP BY STEP:
+=============================
+
+Example 1: Adding Task to Google Calendar
+------------------------------------------
+1. User has a task: "Finish project report" due tomorrow 2 PM
+2. User clicks Google Calendar button next to the task
+3. Browser sends POST request to /tasks/123/add-to-google-calendar
+4. App takes task data from database
+5. App calls Google Calendar API
+6. Google Calendar creates event: "📋 Task: Finish project report"
+7. Event has red color (high priority) and reminders (1 hour + 10 minutes)
+8. User sees success message
+
+Example 2: Creating New Event
+-----------------------------
+1. User fills out "Add Event" form
+2. User enters: "Doctor Appointment" on July 10, 9 AM
+3. User checks "Also add to Google Calendar"
+4. Form submits to /calendar/add
+5. App saves event in local database
+6. App calls POST /calendar/google/create
+7. Event appears in both local calendar and Google Calendar
+8. User gets confirmation message
+
+Example 3: Syncing Calendar
+---------------------------
+1. User clicks "Sync Google Calendar" button
+2. Browser goes to /calendar/sync
+3. App authenticates with Google
+4. App fetches latest events from Google Calendar
+5. Calendar page refreshes with updated events
+6. User sees combined local + Google events
+
+MULTI-USER SUPPORT:
+==================
+
+How Same Endpoints Work for Multiple Users:
+--------------------------------------------
+- User A clicks sync → /calendar/sync → A's Google Calendar
+- User B clicks sync → /calendar/sync → B's Google Calendar  
+- User C clicks sync → /calendar/sync → C's Google Calendar
+
+The Magic:
+----------
+- Same URL endpoints for all users
+- Google OAuth identifies which user is requesting
+- Each user sees only their own calendar data
+- Complete privacy between users
+
+REAL-WORLD BENEFITS:
+===================
+
+For Personal Use:
+-----------------
+- Tasks automatically become calendar events
+- Events sync across all devices (phone, tablet, computer)
+- Smart reminders and notifications
+- Never miss appointments or deadlines
+
+For Multi-User Publishing:
+--------------------------
+- Family members can each use their own Google account
+- Team members get individual calendar integration
+- Public web app can serve unlimited users
+- Each user's data remains completely private
+
+API ENDPOINT TYPES:
+==================
+
+GET Endpoints (Read Data):
+--------------------------
+- /calendar/sync - Read and display calendar events
+- /calendar/google/events - Get events as JSON data
+
+POST Endpoints (Create/Modify Data):
+------------------------------------
+- /calendar/google/create - Create basic event
+- /calendar/google/create-task - Create task event
+- /calendar/google/create-meeting - Create meeting
+- /tasks/{id}/add-to-google-calendar - Add task to calendar
+- /events/{id}/add-to-google-calendar - Add event to calendar
+
+SECURITY & PRIVACY:
+==================
+
+How User Data is Protected:
+---------------------------
+1. OAuth Authentication - Each request verified with Google
+2. User Isolation - Can only access own calendar
+3. Token Management - Secure storage and automatic refresh
+4. Error Handling - Graceful failures without data exposure
+
+What Users Control:
+------------------
+- Grant Access: Users choose to connect Google Calendar
+- Revoke Access: Users can disconnect anytime
+- View Only Their Data: No access to other users' calendars
+
+TECHNICAL DETAILS:
+=================
+
+Authentication Flow:
+-------------------
+1. User clicks any Google Calendar button
+2. App checks if user authenticated with Google
+3. If not: Redirects to Google login
+4. User signs in with Google account
+5. Google redirects back with access token
+6. App can now access user's calendar
+7. Endpoint executes with user's permissions
+
+Data Format Examples:
+--------------------
+
+Input to Create Event:
+{
+  "title": "Team Meeting",
+  "description": "Weekly standup",
+  "start_datetime": "2025-07-10T14:00:00",
+  "end_datetime": "2025-07-10T15:00:00",
+  "location": "Conference Room A"
+}
+
+Response from Get Events:
+{
+  "success": true,
+  "events": [
+    {
+      "title": "Team Meeting",
+      "start_date": "2025-07-10T14:00:00",
+      "location": "Conference Room A"
+    }
+  ]
+}
+
+SUMMARY:
+========
+
+API Endpoints are the "bridge" between your productivity dashboard and Google Calendar.
+
+They handle:
+- Authentication with Google
+- Reading calendar events
+- Creating events, tasks, meetings
+- Multi-user support automatically
+- Security and privacy
+
+Result: Seamless integration where your tasks and events appear in Google Calendar, 
+sync across all devices, and work for unlimited users while maintaining complete privacy.
+
+The endpoints make your productivity app as powerful as commercial solutions like 
+Todoist, Notion, or Microsoft To Do - but with your own custom features!
+
+For more detailed technical information, see API_ENDPOINTS_EXPLAINED.md

@@ -1,0 +1,374 @@
+# API ENDPOINTS EXPLANATION
+# Productivity Web App with Google Calendar Integration
+
+## OVERVIEW
+This document explains all API endpoints available in the productivity web app.
+The app provides both local functionality (tasks, events, notes) and Google Calendar integration.
+
+## AUTHENTICATION
+- Google Calendar features require OAuth 2.0 authentication
+- Users authenticate with their own Google accounts
+- Each user's calendar data remains private
+
+## ENDPOINT CATEGORIES
+
+### 1. MAIN PAGES
+GET /
+- Description: Home page showing dashboard with tasks, events, and notes
+- Returns: HTML page with recent items
+- Authentication: Not required
+
+GET /tasks
+- Description: Task management page
+- Returns: HTML page with all tasks and creation form
+- Authentication: Not required (for local tasks)
+
+GET /events
+- Description: Event management page
+- Returns: HTML page with all events and creation form
+- Authentication: Not required (for local events)
+
+GET /calendar
+- Description: Calendar view page
+- Returns: HTML page with calendar interface
+- Authentication: Not required (shows local events by default)
+
+GET /notes
+- Description: Notes management page
+- Returns: HTML page with all notes
+- Authentication: Not required
+
+### 2. TASK MANAGEMENT
+POST /tasks
+- Description: Create a new task
+- Request Body: 
+  * title (required): Task title
+  * description (optional): Task description
+  * due_date (optional): Due date in YYYY-MM-DD format
+  * priority (optional): high, medium, low
+- Returns: Redirect to tasks page
+- Authentication: Not required
+
+POST /tasks/<id>/complete
+- Description: Mark task as completed
+- Parameters: id (task ID)
+- Returns: Redirect to tasks page
+- Authentication: Not required
+
+POST /tasks/<id>/delete
+- Description: Delete a task
+- Parameters: id (task ID)
+- Returns: Redirect to tasks page
+- Authentication: Not required
+
+POST /tasks/<id>/add-to-google-calendar
+- Description: Add existing task to Google Calendar
+- Parameters: id (task ID)
+- Requirements: Task must have a due date
+- Returns: Redirect to tasks page with success/error message
+- Authentication: Google OAuth required
+- Google Calendar: Creates event with task title and due date
+
+### 3. EVENT MANAGEMENT
+POST /events
+- Description: Create a new event
+- Request Body:
+  * title (required): Event title
+  * description (optional): Event description
+  * start_time (required): Start time in YYYY-MM-DDTHH:MM format
+  * end_time (required): End time in YYYY-MM-DDTHH:MM format
+  * location (optional): Event location
+  * add_to_google_calendar (optional): Checkbox to also create in Google Calendar
+- Returns: Redirect to events page
+- Authentication: Not required (for local events)
+- Google Calendar: Optional dual creation if checkbox selected
+
+POST /events/<id>/delete
+- Description: Delete an event
+- Parameters: id (event ID)
+- Returns: Redirect to events page
+- Authentication: Not required
+
+POST /events/<id>/add-to-google-calendar
+- Description: Add existing local event to Google Calendar
+- Parameters: id (event ID)
+- Returns: Redirect to events page with success/error message
+- Authentication: Google OAuth required
+- Google Calendar: Creates event with all event details
+
+### 4. NOTE MANAGEMENT
+POST /notes
+- Description: Create a new note
+- Request Body:
+  * title (required): Note title
+  * content (required): Note content
+- Returns: Redirect to notes page
+- Authentication: Not required
+
+POST /notes/<id>/delete
+- Description: Delete a note
+- Parameters: id (note ID)
+- Returns: Redirect to notes page
+- Authentication: Not required
+
+### 5. GOOGLE CALENDAR INTEGRATION
+
+#### 5.1 AUTHENTICATION & SYNC
+GET /calendar/sync
+- Description: Manual sync with Google Calendar
+- Process:
+  1. Initiates Google OAuth flow if not authenticated
+  2. Fetches recent events from Google Calendar
+  3. Displays them in the calendar view
+- Returns: Redirect to calendar page with Google events
+- Authentication: Google OAuth required
+- Google Calendar: Reads calendar events
+
+#### 5.2 DATA RETRIEVAL
+GET /calendar/google/events
+- Description: Get Google Calendar events as JSON
+- Parameters: None
+- Returns: JSON array of calendar events
+- Authentication: Google OAuth required
+- Google Calendar: Reads calendar events
+- Use Case: AJAX requests, background loading
+
+Example Response:
+{
+  "events": [
+    {
+      "id": "event123",
+      "title": "Meeting with Team",
+      "start": "2025-07-05T10:00:00",
+      "end": "2025-07-05T11:00:00",
+      "description": "Weekly team meeting",
+      "location": "Conference Room A"
+    }
+  ]
+}
+
+#### 5.3 EVENT CREATION
+POST /calendar/google/create
+- Description: Create basic event in Google Calendar
+- Request Body:
+  * title (required): Event title
+  * description (optional): Event description
+  * start_time (required): Start time in YYYY-MM-DDTHH:MM format
+  * end_time (required): End time in YYYY-MM-DDTHH:MM format
+  * location (optional): Event location
+- Returns: Redirect to calendar page with success/error message
+- Authentication: Google OAuth required
+- Google Calendar: Creates event directly in user's calendar
+
+POST /calendar/google/create-task
+- Description: Create task as calendar event with priority colors
+- Request Body:
+  * title (required): Task title
+  * description (optional): Task description
+  * due_date (required): Due date in YYYY-MM-DD format
+  * priority (optional): high, medium, low
+- Returns: Redirect to calendar page with success/error message
+- Authentication: Google OAuth required
+- Google Calendar: Creates all-day event with:
+  * Red color for high priority
+  * Orange color for medium priority
+  * Blue color for low priority
+  * Reminder 15 minutes before
+
+POST /calendar/google/create-meeting
+- Description: Create meeting with attendees and reminders
+- Request Body:
+  * title (required): Meeting title
+  * description (optional): Meeting description
+  * start_time (required): Start time in YYYY-MM-DDTHH:MM format
+  * end_time (required): End time in YYYY-MM-DDTHH:MM format
+  * location (optional): Meeting location
+  * attendees (optional): Comma-separated email addresses
+- Returns: Redirect to calendar page with success/error message
+- Authentication: Google OAuth required
+- Google Calendar: Creates meeting with:
+  * Email invitations to attendees
+  * Reminder 15 minutes before
+  * Reminder 1 day before
+
+## ERROR HANDLING
+
+### Common Error Responses:
+1. Authentication Required:
+   - Redirects to Google OAuth flow
+   - User must grant calendar permissions
+
+2. Invalid Data:
+   - Flash error message displayed
+   - User redirected back to form
+
+3. Google API Errors:
+   - Flash error message with details
+   - Graceful fallback to local functionality
+
+4. Missing Required Fields:
+   - Form validation errors
+   - User prompted to fill required fields
+
+## USAGE EXAMPLES
+
+### 1. Creating a Task and Adding to Google Calendar
+Step 1: POST /tasks
+{
+  "title": "Finish project report",
+  "description": "Complete quarterly report",
+  "due_date": "2025-07-10",
+  "priority": "high"
+}
+
+Step 2: POST /tasks/123/add-to-google-calendar
+- Creates red-colored all-day event on July 10th
+- Adds 15-minute reminder
+
+### 2. Creating Event with Dual Storage
+POST /events
+{
+  "title": "Team Meeting",
+  "description": "Weekly sync",
+  "start_time": "2025-07-05T10:00",
+  "end_time": "2025-07-05T11:00",
+  "location": "Conference Room",
+  "add_to_google_calendar": "on"
+}
+- Creates event locally AND in Google Calendar
+
+### 3. Creating a Meeting with Attendees
+POST /calendar/google/create-meeting
+{
+  "title": "Project Review",
+  "description": "Monthly project review",
+  "start_time": "2025-07-10T14:00",
+  "end_time": "2025-07-10T15:00",
+  "location": "Zoom Meeting",
+  "attendees": "john@company.com,jane@company.com"
+}
+- Creates meeting in Google Calendar
+- Sends email invitations to attendees
+- Sets up reminders
+
+## MULTI-USER BEHAVIOR
+
+### How Multi-User Works:
+1. Each user authenticates with their own Google account
+2. Same endpoints serve all users
+3. Google OAuth identifies which user is making the request
+4. Each user sees only their own calendar data
+5. Complete privacy between users
+
+### Example Multi-User Flow:
+User A: POST /calendar/google/create → A's calendar updated
+User B: POST /calendar/google/create → B's calendar updated
+User C: GET /calendar/google/events → Only C's events returned
+
+## PERMISSIONS REQUIRED
+
+### Google Calendar Scope:
+- https://www.googleapis.com/auth/calendar
+- Allows read and write access to user's calendar
+- Required for all Google Calendar endpoints
+
+### Local Features:
+- No authentication required
+- Data stored locally in SQLite database
+- No Google permissions needed
+
+## RATE LIMITS
+
+### Google Calendar API:
+- 25,000 requests per day (free tier)
+- 500 requests per 100 seconds per user
+- Generous limits for most applications
+
+### Local Features:
+- No rate limits
+- Limited only by server capacity
+
+## TESTING ENDPOINTS
+
+### Using curl:
+# Create task
+curl -X POST http://localhost:5000/tasks \
+  -d "title=Test Task&due_date=2025-07-10&priority=high"
+
+# Get Google Calendar events (requires authentication)
+curl -X GET http://localhost:5000/calendar/google/events
+
+# Create Google Calendar event
+curl -X POST http://localhost:5000/calendar/google/create \
+  -d "title=Test Event&start_time=2025-07-05T10:00&end_time=2025-07-05T11:00"
+
+### Using Browser:
+1. Navigate to http://localhost:5000
+2. Create tasks and events using the web interface
+3. Click "Sync with Google Calendar" to authenticate
+4. Use "Add to Google Calendar" buttons for integration
+
+## DEPLOYMENT CONSIDERATIONS
+
+### For Personal Use:
+- Run locally on localhost:5000
+- No additional configuration needed
+- Google OAuth works with localhost
+
+### For Public Deployment:
+- Update Google Cloud Console with production domain
+- Use HTTPS (required for OAuth)
+- Configure proper environment variables
+- Set up OAuth consent screen
+
+### For Multi-User SaaS:
+- Add user session management
+- Store credentials per user
+- Implement user registration/login
+- Scale database and server capacity
+
+## SECURITY NOTES
+
+### Data Privacy:
+- Local data stored in SQLite database
+- Google Calendar data accessed via OAuth
+- No user data shared between accounts
+- Users can revoke access independently
+
+### API Security:
+- Google OAuth 2.0 for authentication
+- HTTPS required for production
+- No API keys exposed to client-side
+- Proper error handling prevents data leaks
+
+## TROUBLESHOOTING
+
+### Common Issues:
+1. "Authentication required" - User needs to complete OAuth flow
+2. "Invalid date format" - Use YYYY-MM-DD or YYYY-MM-DDTHH:MM
+3. "Google API error" - Check internet connection and API quotas
+4. "Task has no due date" - Can't add tasks without due dates to calendar
+
+### Debug Steps:
+1. Check Flask debug output
+2. Verify Google Cloud Console settings
+3. Test with minimal data first
+4. Check browser console for JavaScript errors
+
+## FUTURE ENHANCEMENTS
+
+### Planned Features:
+1. Event editing/updating in Google Calendar
+2. Event deletion from Google Calendar
+3. Webhook support for real-time sync
+4. Recurring event support
+5. Calendar sharing between users
+6. Advanced filtering and search
+
+### API Extensibility:
+- RESTful design allows easy additions
+- JSON responses for programmatic access
+- Modular Google Calendar integration
+- Scalable multi-user architecture
+
+This completes the comprehensive API endpoint explanation. All endpoints are designed to work seamlessly for both single-user and multi-user scenarios with proper Google Calendar integration.
