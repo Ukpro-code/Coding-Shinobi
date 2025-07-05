@@ -262,28 +262,84 @@ User 3 → Signs in with their Google Account → Sees their calendar
 
 ### Common Issues
 
-1. **"Google Calendar integration is not enabled"**
+1. **"App not verified" or "Error 403: access_denied"**
+   - **Problem**: Your OAuth app is in testing mode and you're not added as a test user
+   - **Solution 1 (Recommended for personal use)**: Add yourself as a test user
+     1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+     2. Navigate to "APIs & Services" > "OAuth consent screen"
+     3. Scroll down to "Test users" section
+     4. Click "Add users"
+     5. Enter your email address (the one you're trying to authenticate with)
+     6. Click "Save"
+     7. Try authentication again
+   - **Solution 2 (For public apps)**: Publish your app
+     1. Go to "APIs & Services" > "OAuth consent screen"
+     2. Click "Publish App"
+     3. Note: This may require Google's review for sensitive scopes
+
+2. **"Google Calendar integration is not enabled"**
    - Check if `credentials.json` exists
    - Verify required packages are installed
    - Restart the application
 
-2. **"An error occurred: invalid_grant"**
+3. **"An error occurred: invalid_grant"**
    - Delete `token.json` file
    - Re-authenticate using sync button
 
-3. **"Google Calendar credentials file not found"**
+4. **"Google Calendar credentials file not found"**
    - Ensure `credentials.json` is in the correct location
    - Verify file permissions
 
-4. **No Google Calendar events showing**
+5. **No Google Calendar events showing**
    - Check if you have events in your Google Calendar
    - Verify the time range (shows next 7 days by default)
    - Try manual sync
+
+6. **"Error loading calendar: can't compare offset-naive and offset-aware datetimes"**
+   - **Problem**: Timezone mismatch between Google Calendar events and local events
+   - **Solution**: This is automatically handled in the latest version
+   - **If still occurs**: Restart the Flask application
+   - **Note**: Google Calendar events are timezone-aware, local events are timezone-naive
 
 ### Debug Mode
 - Enable debug logging in `google_calendar.py`
 - Check browser console for JavaScript errors
 - Verify API responses in network tab
+
+## **🚨 OAuth Consent Screen Issues**
+
+### **Error 403: access_denied - App Not Verified**
+
+**Problem**: "My productivity Dashboard has not completed the Google verification process"
+
+**Cause**: Your OAuth consent screen is in "Testing" mode and you're not added as a test user.
+
+**Solution 1: Add Yourself as Test User** ⭐ **Recommended for Personal Use**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Navigate to **APIs & Services** → **OAuth consent screen**
+3. Scroll down to **"Test users"** section
+4. Click **"Add users"**
+5. Add **your email address** (the one you're trying to sign in with)
+6. Click **"Save"**
+7. Try authentication again
+
+**Solution 2: Publish Your App** ⭐ **For Multi-User or Public Use**
+1. In **OAuth consent screen**, scroll to bottom
+2. Click **"Publish App"**
+3. Click **"Confirm"** (safe for personal/small apps)
+4. Your app will be available to any Google user
+5. Users may see "unverified app" warning but can proceed
+
+**Solution 3: Request Verification** (Only for large-scale apps)
+- Required only if you plan to serve 100+ users
+- Takes weeks and requires detailed review
+- Not needed for personal or small team use
+
+### **Which Solution to Choose:**
+
+**For Personal Use:** Use Solution 1 (Add Test User)
+**For Family/Team:** Use Solution 2 (Publish App)
+**For Public SaaS:** Use Solution 2 initially, then Solution 3 if needed
 
 ## Security Notes
 - Keep `credentials.json` and `token.json` secure
@@ -311,48 +367,48 @@ User 3 → Signs in with their Google Account → Sees their calendar
 ### **1. OAuth Configuration Errors**
 
 #### **❌ Wrong Application Type**
-- **Mistake**: Choosing "Desktop application" instead of "Web application"
-- **Problem**: OAuth flow won't work properly with Flask web app
-- **Solution**: Always choose "Web application" for Flask apps
+- **Mistake**: Choosing "Web application" instead of "Desktop application"
+- **Problem**: OAuth flow won't work properly with InstalledAppFlow
+- **Solution**: Always choose "Desktop application" for this setup
 
 #### **❌ Incorrect JavaScript Origins**
 ```
-❌ Wrong: http://localhost:5000/calendar
-❌ Wrong: localhost:5000
-❌ Wrong: https://localhost:5000 (for local dev)
-✅ Correct: http://localhost:5000 (for local dev)
-✅ Correct: https://yourdomain.com (for production)
+❌ Wrong: Adding any JavaScript Origins for Desktop apps
+❌ Wrong: http://localhost:5000 (not needed for desktop)
+❌ Wrong: https://yourdomain.com (not needed for desktop)
+✅ Correct: Leave JavaScript Origins EMPTY for Desktop applications
 ```
 
 #### **❌ Missing or Wrong Redirect URIs**
 ```
-❌ Wrong: http://localhost:5000
-❌ Wrong: http://localhost:5000/auth
-❌ Wrong: http://localhost:5000/callback
-✅ Correct: http://localhost:5000/oauth2callback
+❌ Wrong: Adding any manual redirect URIs for Desktop apps
+❌ Wrong: http://localhost:5000/oauth2callback
+❌ Wrong: http://localhost:8080/
+✅ Correct: Let Google handle redirect URIs automatically for Desktop applications
+✅ Note: Google automatically configures redirect URIs for Desktop apps
 ```
 
 ### **2. File Setup Errors**
 
 #### **❌ Wrong Credentials File Structure**
-- **Mistake**: Using "installed" instead of "web" in credentials.json
-- **Problem**: Happens when you accidentally choose "Desktop application"
-- **Solution**: Re-create credentials as "Web application"
+- **Mistake**: Using "web" instead of "installed" in credentials.json
+- **Problem**: Happens when you accidentally choose "Web application"
+- **Solution**: Re-create credentials as "Desktop application"
 
 ```json
-❌ Wrong (Desktop app structure):
-{
-  "installed": {
-    "client_id": "...",
-    "redirect_uris": ["http://localhost"]
-  }
-}
-
-✅ Correct (Web app structure):
+❌ Wrong (Web app structure):
 {
   "web": {
     "client_id": "...",
     "redirect_uris": ["http://localhost:5000/oauth2callback"]
+  }
+}
+
+✅ Correct (Desktop app structure):
+{
+  "installed": {
+    "client_id": "...",
+    "redirect_uris": ["http://localhost"]
   }
 }
 ```
@@ -381,11 +437,10 @@ User 3 → Signs in with their Google Account → Sees their calendar
 ### **4. Port and URL Mismatches**
 
 #### **❌ Running Flask on Different Port**
-- **Mistake**: Flask runs on port 5001 but OAuth configured for 5000
-- **Problem**: Redirect URI mismatch error
-- **Solution**: Either:
-  - Change Flask to run on port 5000: `app.run(port=5000)`
-  - Or update OAuth settings to match your port
+- **Mistake**: OAuth authentication port conflicts
+- **Problem**: InstalledAppFlow uses dynamic ports, but fixed port is better
+- **Solution**: Code is set to use port 8080 for consistency
+- **Note**: This is handled automatically by the InstalledAppFlow
 
 #### **❌ HTTP vs HTTPS Confusion**
 ```
@@ -487,21 +542,22 @@ token.json
 ### **Quick Checklist to Avoid Mistakes:**
 
 ✅ **Before Starting:**
-- [ ] Choose "Web application" (not Desktop)
+- [ ] Choose "Desktop application" (not Web)
 - [ ] Have Python 3.7+ installed
 - [ ] Have Flask app ready to test
 
 ✅ **During Setup:**
-- [ ] JavaScript Origins: `http://localhost:5000`
-- [ ] Redirect URIs: `http://localhost:5000/oauth2callback`
+- [ ] Application Type: Desktop application
+- [ ] JavaScript Origins: Leave EMPTY
+- [ ] Redirect URIs: Let Google handle automatically
 - [ ] OAuth consent screen configured
 - [ ] User Type: External
 
 ✅ **After Setup:**
 - [ ] credentials.json in correct location
-- [ ] File has "web" structure (not "installed")
+- [ ] File has "installed" structure (not "web")
 - [ ] Test authentication flow completely
-- [ ] Check browser console for errors
+- [ ] Check for any port conflicts
 
 ✅ **For Production:**
 - [ ] Update URLs to production domain
@@ -512,9 +568,9 @@ token.json
 ### **When Things Go Wrong:**
 
 1. **"This app isn't verified"** → Complete OAuth consent screen
-2. **"Redirect URI mismatch"** → Check JavaScript Origins and Redirect URIs
-3. **"Invalid client"** → Check credentials.json structure
+2. **"Redirect URI mismatch"** → Delete and recreate OAuth client as Desktop application
+3. **"Invalid client"** → Check credentials.json has "installed" structure
 4. **"Access denied"** → User needs to grant permissions
 5. **"Token expired"** → Delete token.json and re-authenticate
 
-**Remember**: Most issues are configuration problems, not code problems!
+**Remember**: For Desktop applications, Google handles redirect URIs automatically!

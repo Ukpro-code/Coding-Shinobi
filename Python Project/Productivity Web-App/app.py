@@ -301,19 +301,23 @@ def calendar():
         # Sort all events by start date
         all_events.sort(key=lambda x: x['start_date'])
         
+        # Get current time as naive UTC for comparison
+        current_time = datetime.utcnow()
+        
         return render_template('calendar.html', 
                              events=all_events,
                              google_calendar_enabled=GOOGLE_CALENDAR_ENABLED,
                              google_calendar_error=google_calendar_error,
-                             current_time=datetime.utcnow())
+                             current_time=current_time)
     
     except Exception as e:
         flash(f'Error loading calendar: {str(e)}', 'error')
+        current_time = datetime.utcnow()
         return render_template('calendar.html', 
                              events=[], 
                              google_calendar_enabled=GOOGLE_CALENDAR_ENABLED,
                              google_calendar_error=None,
-                             current_time=datetime.utcnow())
+                             current_time=current_time)
 
 @app.route('/calendar/add', methods=['GET', 'POST'])
 def add_event():

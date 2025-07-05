@@ -76,11 +76,21 @@ class GoogleCalendarService:
                 start = event['start'].get('dateTime', event['start'].get('date'))
                 end = event['end'].get('dateTime', event['end'].get('date'))
                 
-                # Parse datetime
+                # Parse datetime and convert to timezone-naive UTC
                 if 'T' in start:
+                    # This is a datetime with timezone
                     start_dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
                     end_dt = datetime.fromisoformat(end.replace('Z', '+00:00'))
+                    
+                    # Convert to naive UTC datetime for consistency
+                    if start_dt.tzinfo is not None:
+                        start_dt = start_dt.utctimetuple()
+                        start_dt = datetime(*start_dt[:6])
+                    if end_dt.tzinfo is not None:
+                        end_dt = end_dt.utctimetuple()
+                        end_dt = datetime(*end_dt[:6])
                 else:
+                    # This is a date only (all-day event)
                     start_dt = datetime.fromisoformat(start)
                     end_dt = datetime.fromisoformat(end)
                 
