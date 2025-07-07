@@ -2,6 +2,10 @@
 
 {% block title %}Tasks - Productivity Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/lovable-tasks.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
@@ -49,15 +53,15 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr>
+                                <tr class="task-row {{ 'task-completed' if task.status == 'completed' else '' }}" data-task-id="{{ task.id }}">
                                     <td>
-                                        <strong>{{ task.title }}</strong>
+                                        <strong class="task-title">{{ task.title }}</strong>
                                         {% if task.description %}
                                             <br><small class="text-muted">{{ task.description }}</small>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'medium' else 'secondary' }}">
+                                        <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'medium' else 'secondary' }} priority-{{ task.priority }}">
                                             {{ task.priority.title() }}
                                         </span>
                                     </td>
@@ -75,8 +79,11 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <form method="POST" action="{{ url_for('update_task_status', task_id=task.id) }}" style="display: inline;">
-                                                <select name="status" class="form-select form-select-sm me-2" onchange="this.form.submit()">
+                                            <form method="POST" action="{{ url_for('update_task_status', task_id=task.id) }}" style="display: inline;" class="task-update-form">
+                                                <select name="status" class="form-select form-select-sm me-2 task-status-select" 
+                                                        data-task-id="{{ task.id }}" 
+                                                        data-task-title="{{ task.title }}" 
+                                                        data-task-priority="{{ task.priority }}">
                                                     <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
                                                     <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
                                                     <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
@@ -117,4 +124,148 @@
         </div>
     </div>
 </div>
+
+<!-- Streak Counter (will be populated by JavaScript) -->
+<div id="streak-counter" class="streak-counter" style="display: none;">
+    <span class="streak-emoji">🔥</span>
+    <span class="streak-number">0</span>
+    <span>day streak!</span>
+</div>
+
+<!-- Motivational Quote Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div id="motivational-quote" class="motivational-quote" style="display: none;">
+            <div class="quote-text"></div>
+            <div class="quote-author"></div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/task-celebrations.js') }}"></script>
+<script>
+// Initialize the Task Celebration System
+let taskCelebration;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize celebration system
+    taskCelebration = new TaskCelebration();
+    
+    // Set up task status change handlers
+    const statusSelects = document.querySelectorAll('.task-status-select');
+    statusSelects.forEach(select => {
+        select.addEventListener('change', function(e) {
+            const taskId = this.dataset.taskId;
+            const taskTitle = this.dataset.taskTitle;
+            const taskPriority = this.dataset.taskPriority;
+            const newStatus = this.value;
+            const taskRow = this.closest('tr');
+            
+            // Add loading state
+            taskRow.classList.add('task-updating');
+            
+            // Make AJAX call instead of form submission
+            fetch(`{{ url_for('update_task_status', task_id=0) }}`.replace('0', taskId) + '?format=json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `status=${newStatus}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading state
+                taskRow.classList.remove('task-updating');
+                
+                if (data.success) {
+                    // Update UI
+                    updateTaskRowStatus(taskRow, newStatus);
+                    
+                    // Trigger celebration if task was completed
+                    if (data.task.was_completed) {
+                        taskCelebration.celebrateTaskCompletion(taskId, taskTitle, taskPriority);
+                    }
+                    
+                    // Show success message
+                    showFlashMessage(data.message, 'success');
+                } else {
+                    // Show error message and revert selection
+                    showFlashMessage(data.message, 'error');
+                    this.value = data.task ? data.task.status : 'pending';
+                }
+            })
+            .catch(error => {
+                // Remove loading state
+                taskRow.classList.remove('task-updating');
+                
+                console.error('Error updating task:', error);
+                showFlashMessage('Error updating task. Please try again.', 'error');
+                
+                // Revert selection
+                this.value = this.dataset.originalValue || 'pending';
+            });
+        });
+        
+        // Store original value for error recovery
+        select.dataset.originalValue = select.value;
+    });
+    
+    // Load and display motivational quote
+    loadMotivationalQuote();
+});
+
+function updateTaskRowStatus(taskRow, newStatus) {
+    // Update status badge
+    const statusBadge = taskRow.querySelector('.badge');
+    statusBadge.className = `badge bg-${newStatus === 'completed' ? 'success' : newStatus === 'in_progress' ? 'info' : 'secondary'}`;
+    statusBadge.textContent = newStatus.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    
+    // Update row styling
+    if (newStatus === 'completed') {
+        taskRow.classList.add('task-completed');
+    } else {
+        taskRow.classList.remove('task-completed');
+    }
+}
+
+function showFlashMessage(message, type) {
+    // Create flash message element
+    const flashDiv = document.createElement('div');
+    flashDiv.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show`;
+    flashDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insert at the top of the content
+    const contentDiv = document.querySelector('.row.mb-4');
+    contentDiv.insertAdjacentElement('afterend', flashDiv);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (flashDiv.parentNode) {
+            flashDiv.remove();
+        }
+    }, 5000);
+}
+
+function loadMotivationalQuote() {
+    fetch('{{ url_for("get_motivational_quote") }}')
+        .then(response => response.json())
+        .then(data => {
+            const quoteDiv = document.getElementById('motivational-quote');
+            const quoteText = quoteDiv.querySelector('.quote-text');
+            const quoteAuthor = quoteDiv.querySelector('.quote-author');
+            
+            quoteText.textContent = `"${data.text}"`;
+            quoteAuthor.textContent = `— ${data.author}`;
+            
+            quoteDiv.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error loading motivational quote:', error);
+        });
+}
+</script>

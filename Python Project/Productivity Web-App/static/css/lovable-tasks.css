@@ -1,0 +1,352 @@
+/* Lovable Task Celebration Styles */
+/* Makes task completion feel rewarding and delightful */
+
+/* Confetti Animation */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.confetti {
+    position: absolute;
+    font-size: 2rem;
+    animation: confetti-fall 3s ease-out forwards;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.confetti:nth-child(1) {
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.confetti:nth-child(2) {
+    left: 20%;
+    animation-delay: 0.2s;
+}
+
+.confetti:nth-child(3) {
+    left: 30%;
+    animation-delay: 0.4s;
+}
+
+.confetti:nth-child(4) {
+    left: 40%;
+    animation-delay: 0.6s;
+}
+
+.confetti:nth-child(5) {
+    left: 60%;
+    animation-delay: 0.8s;
+}
+
+/* Toast Notifications */
+.celebration-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 9998;
+    animation: toast-slide-in 0.5s ease-out;
+    max-width: 350px;
+    font-weight: 500;
+}
+
+.celebration-toast-high {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    border-left: 4px solid #fff;
+}
+
+.celebration-toast-medium {
+    background: linear-gradient(135deg, #ffc107, #f39c12);
+    border-left: 4px solid #fff;
+}
+
+.celebration-toast-low {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    border-left: 4px solid #fff;
+}
+
+.toast-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+@keyframes toast-slide-in {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Streak Counter */
+.streak-counter {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
+    z-index: 9997;
+    transition: all 0.3s ease;
+}
+
+.streak-counter:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.4);
+}
+
+.streak-counter .streak-number {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.streak-counter .streak-emoji {
+    font-size: 16px;
+}
+
+/* Task Completion Animation */
+.task-completing {
+    animation: task-completion-glow 1s ease-out;
+}
+
+@keyframes task-completion-glow {
+    0% {
+        box-shadow: 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.7);
+        transform: scale(1.02);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(40, 167, 69, 0.7);
+        transform: scale(1);
+    }
+}
+
+/* Achievement Modal */
+.achievement-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: modal-fade-in 0.3s ease-out;
+}
+
+.achievement-content {
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: #333;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.achievement-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.achievement-description {
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.achievement-close {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.achievement-close:hover {
+    background: #555;
+}
+
+@keyframes modal-fade-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Motivational Quote Box */
+.motivational-quote {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;
+    font-style: italic;
+    animation: quote-glow 2s ease-in-out infinite alternate;
+}
+
+.motivational-quote .quote-text {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.motivational-quote .quote-author {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+@keyframes quote-glow {
+    0% {
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(102, 126, 234, 0.8);
+    }
+}
+
+/* Task Row Animations */
+.task-row {
+    transition: all 0.3s ease;
+}
+
+.task-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.task-completed {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left: 4px solid #28a745;
+}
+
+.task-completed .task-title {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* Priority Glow Effects */
+.priority-high {
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+}
+
+.priority-medium {
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+}
+
+.priority-low {
+    box-shadow: 0 0 10px rgba(108, 117, 125, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .celebration-toast {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .streak-counter {
+        right: 10px;
+        top: 70px;
+    }
+    
+    .achievement-content {
+        margin: 20px;
+        max-width: none;
+    }
+}
+
+/* Loading States */
+.task-updating {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.task-updating::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #007bff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

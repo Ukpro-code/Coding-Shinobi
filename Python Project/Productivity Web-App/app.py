@@ -230,16 +230,47 @@ def update_task_status(task_id):
         new_status = request.form.get('status')
         
         if new_status in ['pending', 'in_progress', 'completed']:
+            old_status = task.status
             task.status = new_status
             task.updated_at = datetime.utcnow()
             db.session.commit()
-            flash('Task status updated!', 'success')
+            
+            # Check if request wants JSON response (for AJAX calls)
+            if request.headers.get('Content-Type') == 'application/json' or request.args.get('format') == 'json':
+                return jsonify({
+                    'success': True,
+                    'message': 'Task status updated!',
+                    'task': {
+                        'id': task.id,
+                        'title': task.title,
+                        'status': task.status,
+                        'priority': task.priority,
+                        'old_status': old_status,
+                        'was_completed': new_status == 'completed' and old_status != 'completed'
+                    }
+                })
+            else:
+                flash('Task status updated!', 'success')
         else:
-            flash('Invalid status!', 'error')
+            if request.headers.get('Content-Type') == 'application/json' or request.args.get('format') == 'json':
+                return jsonify({
+                    'success': False,
+                    'message': 'Invalid status!'
+                }), 400
+            else:
+                flash('Invalid status!', 'error')
             
     except Exception as e:
         db.session.rollback()
-        flash(f'Error updating task: {str(e)}', 'error')
+        error_message = f'Error updating task: {str(e)}'
+        
+        if request.headers.get('Content-Type') == 'application/json' or request.args.get('format') == 'json':
+            return jsonify({
+                'success': False,
+                'message': error_message
+            }), 500
+        else:
+            flash(error_message, 'error')
     
     return redirect(url_for('tasks'))
 
@@ -589,6 +620,162 @@ def add_event_to_google_calendar(event_id):
         flash(f'Error adding event to Google Calendar: {str(e)}', 'error')
     
     return redirect(url_for('calendar'))
+
+# Journal routes
+@app.route('/journal')
+def journal():
+    try:
+        entries = JournalEntry.query.order_by(JournalEntry.created_at.desc()).all()
+        return render_template('journal.html', entries=entries)
+    except Exception as e:
+        flash(f'Error loading journal entries: {str(e)}', 'error')
+        return render_template('journal.html', entries=[])
+
+@app.route('/journal/add', methods=['GET', 'POST'])
+def add_journal_entry():
+    if request.method == 'POST':
+        try:
+            title = request.form.get('title')
+            content = request.form.get('content')
+            entry_type = request.form.get('entry_type', 'general')
+            mood = request.form.get('mood')
+            
+            if not content:
+                flash('Entry content is required!', 'error')
+                return redirect(url_for('add_journal_entry'))
+            
+            entry = JournalEntry(
+                title=title,
+                content=content,
+                entry_type=entry_type,
+                mood=mood
+            )
+            
+            db.session.add(entry)
+            db.session.commit()
+            flash('Journal entry added successfully!', 'success')
+            return redirect(url_for('journal'))
+            
+        except Exception as e:
+            flash(f'Error adding journal entry: {str(e)}', 'error')
+            return redirect(url_for('add_journal_entry'))
+    
+    return render_template('add_journal_entry.html')
+
+@app.route('/journal/<int:entry_id>/delete', methods=['POST'])
+def delete_journal_entry(entry_id):
+    try:
+        entry = JournalEntry.query.get_or_404(entry_id)
+        db.session.delete(entry)
+        db.session.commit()
+        flash('Journal entry deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting journal entry: {str(e)}', 'error')
+    
+    return redirect(url_for('journal'))
+
+# Goals routes
+@app.route('/goals')
+def goals():
+    try:
+        goals = Goal.query.order_by(Goal.target_date.asc()).all()
+        return render_template('goals.html', goals=goals)
+    except Exception as e:
+        flash(f'Error loading goals: {str(e)}', 'error')
+        return render_template('goals.html', goals=[])
+
+@app.route('/goals/add', methods=['GET', 'POST'])
+def add_goal():
+    if request.method == 'POST':
+        try:
+            title = request.form.get('title')
+            description = request.form.get('description')
+            goal_type = request.form.get('goal_type', 'monthly')
+            target_date_str = request.form.get('target_date')
+            
+            if not title:
+                flash('Goal title is required!', 'error')
+                return redirect(url_for('add_goal'))
+            
+            target_date = None
+            if target_date_str:
+                try:
+                    target_date = datetime.strptime(target_date_str, '%Y-%m-%d')
+                except ValueError:
+                    flash('Invalid date format!', 'error')
+                    return redirect(url_for('add_goal'))
+            
+            goal = Goal(
+                title=title,
+                description=description,
+                goal_type=goal_type,
+                target_date=target_date
+            )
+            
+            db.session.add(goal)
+            db.session.commit()
+            flash('Goal added successfully!', 'success')
+            return redirect(url_for('goals'))
+            
+        except Exception as e:
+            flash(f'Error adding goal: {str(e)}', 'error')
+            return redirect(url_for('add_goal'))
+    
+    return render_template('add_goal.html')
+
+@app.route('/goals/<int:goal_id>/update', methods=['POST'])
+def update_goal(goal_id):
+    try:
+        goal = Goal.query.get_or_404(goal_id)
+        progress = request.form.get('progress', type=float)
+        status = request.form.get('status')
+        
+        if progress is not None:
+            goal.progress = max(0, min(100, progress))  # Clamp between 0-100
+        
+        if status:
+            goal.status = status
+        
+        goal.updated_at = datetime.utcnow()
+        db.session.commit()
+        flash('Goal updated successfully!', 'success')
+        
+    except Exception as e:
+        flash(f'Error updating goal: {str(e)}', 'error')
+    
+    return redirect(url_for('goals'))
+
+@app.route('/goals/<int:goal_id>/delete', methods=['POST'])
+def delete_goal(goal_id):
+    try:
+        goal = Goal.query.get_or_404(goal_id)
+        db.session.delete(goal)
+        db.session.commit()
+        flash('Goal deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting goal: {str(e)}', 'error')
+    
+    return redirect(url_for('goals'))
+
+# New endpoint for getting motivational quotes
+@app.route('/api/motivational-quote')
+def get_motivational_quote():
+    quotes = [
+        {"text": "The way to get started is to quit talking and begin doing.", "author": "Walt Disney"},
+        {"text": "Don't let yesterday take up too much of today.", "author": "Will Rogers"},
+        {"text": "You learn more from failure than from success.", "author": "Unknown"},
+        {"text": "It's not whether you get knocked down, it's whether you get up.", "author": "Vince Lombardi"},
+        {"text": "If you are working on something that you really care about, you don't have to be pushed.", "author": "Steve Jobs"},
+        {"text": "Success is not final, failure is not fatal: it is the courage to continue that counts.", "author": "Winston Churchill"},
+        {"text": "The future belongs to those who believe in the beauty of their dreams.", "author": "Eleanor Roosevelt"},
+        {"text": "Don't watch the clock; do what it does. Keep going.", "author": "Sam Levenson"},
+        {"text": "Great things never come from comfort zones.", "author": "Anonymous"},
+        {"text": "Dream it. Wish it. Do it.", "author": "Anonymous"}
+    ]
+    
+    import random
+    random_quote = random.choice(quotes)
+    return jsonify(random_quote)
 
 # Database initialization
 def create_tables():
