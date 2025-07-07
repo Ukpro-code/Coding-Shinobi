@@ -2,11 +2,26 @@
 
 {% block title %}Tasks - Productivity Dashboard{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/lovable-tasks.css') }}">
+{% block extra_js %}
+<script>
+function initializeTaskCelebrations() {
+    // Celebration system is already initialized globally in base.html
+    console.log('🎉 Task celebrations ready for tasks page!');
+}
+</script>
 {% endblock %}
 
 {% block content %}
+<!-- Task Celebration Elements -->
+<div id="task-celebration-container" class="celebration-container">
+    <div id="celebration-message" class="celebration-message">
+        <i class="fas fa-check-circle celebration-icon"></i>
+        <h3 class="celebration-title">Great Job!</h3>
+        <p class="celebration-text">You completed a task!</p>
+    </div>
+    <div id="confetti-container" class="confetti-container"></div>
+</div>
+
 <div class="row mb-4">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
@@ -143,13 +158,16 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/task-celebrations.js') }}"></script>
 <script>
 // Initialize the Task Celebration System
 let taskCelebration;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize celebration system if not already done
+    if (typeof window.taskCelebration === 'undefined') {
+        window.taskCelebration = new TaskCelebration();
+    }
+    taskCelebration = window.taskCelebration;
     // Initialize celebration system
     taskCelebration = new TaskCelebration();
     

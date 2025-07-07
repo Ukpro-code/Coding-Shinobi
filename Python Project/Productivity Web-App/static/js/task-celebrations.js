@@ -14,8 +14,23 @@ class TaskCelebration {
             achievement: new Audio('/static/sounds/achievement.mp3')
         };
         
+        // Create Web Audio API context for synthetic sounds
+        this.audioContext = null;
+        this.initAudioContext();
+        
         // Set up streak display
         this.updateStreakDisplay();
+        
+        // Initialize sound settings
+        this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+    }
+
+    initAudioContext() {
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('Web Audio API not supported');
+        }
     }
 
     // Main celebration function
@@ -207,35 +222,101 @@ class TaskCelebration {
 
     // Sound effects
     playCompletionSound(priority) {
+        if (!this.soundEnabled) return;
+        
         try {
-            if (this.sounds.complete && this.isSoundEnabled()) {
+            // Try to play audio file first
+            if (this.sounds.complete) {
                 this.sounds.complete.volume = priority === 'high' ? 0.8 : 0.5;
-                this.sounds.complete.play().catch(e => console.log('Sound play failed:', e));
+                this.sounds.complete.play().catch(e => {
+                    console.log('Audio file failed, using synthetic sound:', e);
+                    this.playSyntheticCompletionSound(priority);
+                });
+            } else {
+                // Fallback to synthetic sound
+                this.playSyntheticCompletionSound(priority);
             }
         } catch (e) {
             console.log('Sound not available:', e);
+            this.playSyntheticCompletionSound(priority);
         }
     }
 
     playAchievementSound() {
+        if (!this.soundEnabled) return;
+        
         try {
-            if (this.sounds.achievement && this.isSoundEnabled()) {
+            if (this.sounds.achievement) {
                 this.sounds.achievement.volume = 0.7;
-                this.sounds.achievement.play().catch(e => console.log('Achievement sound failed:', e));
+                this.sounds.achievement.play().catch(e => {
+                    console.log('Achievement audio failed, using synthetic sound:', e);
+                    this.playSyntheticAchievementSound();
+                });
+            } else {
+                this.playSyntheticAchievementSound();
             }
         } catch (e) {
             console.log('Achievement sound not available:', e);
+            this.playSyntheticAchievementSound();
         }
     }
 
+    // Synthetic sound generation for fallback
+    playSyntheticCompletionSound(priority = 'medium') {
+        if (!this.audioContext) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        // Connect nodes
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Set frequency based on priority
+        const frequency = priority === 'high' ? 800 : priority === 'medium' ? 600 : 400;
+        oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+        
+        // Set volume
+        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+        
+        // Play sound
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + 0.3);
+    }
+
+    playSyntheticAchievementSound() {
+        if (!this.audioContext) return;
+        
+        // Create a more elaborate achievement sound
+        const frequencies = [523, 659, 784, 1047]; // C, E, G, C (major chord)
+        
+        frequencies.forEach((freq, index) => {
+            setTimeout(() => {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.2);
+            }, index * 100);
+        });
+    }
+
     isSoundEnabled() {
-        return localStorage.getItem('celebrationSounds') !== 'false';
+        return this.soundEnabled;
     }
 
     toggleSounds() {
-        const enabled = this.isSoundEnabled();
-        localStorage.setItem('celebrationSounds', enabled ? 'false' : 'true');
-        return !enabled;
+        this.soundEnabled = !this.soundEnabled;
+        localStorage.setItem('soundEnabled', this.soundEnabled ? 'true' : 'false');
+        return this.soundEnabled;
     }
 
     // Check for various achievements

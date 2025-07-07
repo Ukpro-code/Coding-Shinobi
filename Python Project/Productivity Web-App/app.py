@@ -757,6 +757,64 @@ def delete_goal(goal_id):
     
     return redirect(url_for('goals'))
 
+# API endpoints for AJAX updates
+@app.route('/api/goals/<int:goal_id>/progress', methods=['PUT'])
+def update_goal_progress_api(goal_id):
+    """Update goal progress via API"""
+    try:
+        data = request.get_json()
+        if not data or 'progress' not in data:
+            return jsonify({'success': False, 'error': 'Progress value required'}), 400
+        
+        progress = data['progress']
+        if not isinstance(progress, (int, float)) or progress < 0 or progress > 100:
+            return jsonify({'success': False, 'error': 'Progress must be between 0 and 100'}), 400
+        
+        goal = Goal.query.get(goal_id)
+        if not goal:
+            return jsonify({'success': False, 'error': 'Goal not found'}), 404
+        
+        goal.progress = progress
+        goal.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'goal': {
+                'id': goal.id,
+                'title': goal.title,
+                'progress': goal.progress,
+                'updated_at': goal.updated_at.isoformat()
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/tasks/<int:task_id>/complete', methods=['POST'])
+def complete_task_api(task_id):
+    """Mark task as complete via API"""
+    try:
+        task = Task.query.get(task_id)
+        if not task:
+            return jsonify({'success': False, 'error': 'Task not found'}), 404
+        
+        task.status = 'completed'
+        task.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'task': {
+                'id': task.id,
+                'title': task.title,
+                'status': task.status,
+                'priority': task.priority,
+                'updated_at': task.updated_at.isoformat()
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # New endpoint for getting motivational quotes
 @app.route('/api/motivational-quote')
 def get_motivational_quote():

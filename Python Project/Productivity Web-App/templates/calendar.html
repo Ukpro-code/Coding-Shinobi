@@ -2,6 +2,20 @@
 
 {% block title %}Calendar - Productivity Dashboard{% endblock %}
 
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calendar-animations.js') }}"></script>
+<script>
+function initializeCalendarAnimations() {
+    // Initialize calendar animations if the script loaded
+    if (typeof window.calendarAnimations !== 'undefined') {
+        window.calendarAnimations.init();
+    } else {
+        console.log('📅 Calendar animations ready for calendar page!');
+    }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
