@@ -1,4 +1,4 @@
- {% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Calendar - Productivity Dashboard{% endblock %}
 
@@ -34,6 +34,17 @@ html, body {
     flex-direction: column;
     min-width: 0;
     background: #000000;
+}
+
+/* Hide sidebar in year view */
+.calendar-main.year-view-active .sidebar {
+    display: none;
+}
+
+/* Make calendar section full width in year view */
+.calendar-main.year-view-active .calendar-section {
+    flex: 1;
+    width: 100%;
 }
 
 /* Sidebar - right side */
@@ -313,82 +324,85 @@ html, body {
 
 /* Sidebar styles */
 .sidebar-header {
-    padding: 24px;
+    padding: 20px;
     border-bottom: 1px solid #1f1f1f;
 }
 
 .sidebar-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #ffffff;
     margin: 0 0 8px 0;
 }
 
 .selected-date {
-    font-size: 13px;
+    font-size: 14px;
     color: #888888;
     margin: 0;
 }
 
 /* Quick add form */
 .quick-add {
-    padding: 24px;
+    padding: 20px;
     border-bottom: 1px solid #1f1f1f;
 }
 
 .quick-add h3 {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #ffffff;
     margin: 0 0 16px 0;
 }
 
 .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
     font-size: 12px;
     font-weight: 500;
-    color: #888888;
-    margin-bottom: 4px;
+    color: #cccccc;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-control {
     width: 100%;
-    background: #1f1f1f;
-    border: 1px solid #333333;
-    border-radius: 6px;
-    padding: 8px 12px;
+    padding: 10px 12px;
+    background: #2a2a2a;
+    border: 1px solid #404040;
+    border-radius: 4px;
     color: #ffffff;
-    font-size: 13px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
 }
 
 .form-control:focus {
     outline: none;
     border-color: #4a69bd;
-    background: #252525;
+    background: #333333;
 }
 
-.form-control::placeholder {
-    color: #555555;
-}
-
-/* Color picker */
 .color-options {
     display: flex;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .color-option {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 2px solid transparent;
     cursor: pointer;
+    border: 2px solid transparent;
     transition: all 0.2s ease;
+}
+
+.color-option.selected {
+    border-color: #ffffff;
+    transform: scale(1.1);
 }
 
 .color-option.work { background: #e74c3c; }
@@ -397,78 +411,99 @@ html, body {
 .color-option.health { background: #f39c12; }
 .color-option.other { background: #9b59b6; }
 
-.color-option.selected {
-    border-color: #ffffff;
-    transform: scale(1.1);
-}
-
 .add-btn {
     width: 100%;
+    padding: 12px;
     background: #4a69bd;
-    border: none;
-    border-radius: 6px;
-    padding: 10px;
     color: #ffffff;
-    font-size: 13px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease;
-    margin-top: 8px;
+    transition: background-color 0.2s ease;
 }
 
 .add-btn:hover {
-    background: #3d5a99;
+    background: #3a5ba0;
+}
+
+.add-btn:active {
+    transform: translateY(1px);
 }
 
 /* Events list */
 .events-section {
+    padding: 20px;
     flex: 1;
-    padding: 24px;
     overflow-y: auto;
 }
 
 .events-section h3 {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #ffffff;
     margin: 0 0 16px 0;
 }
 
 .event-item {
-    background: #1f1f1f;
-    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 12px;
     margin-bottom: 8px;
-    border-left: 3px solid #4a69bd;
+    border-radius: 6px;
+    border-left: 4px solid;
+    background: #1a1a1a;
+    transition: all 0.2s ease;
 }
 
-.event-item.work { border-left-color: #e74c3c; }
-.event-item.study { border-left-color: #3498db; }
-.event-item.personal { border-left-color: #2ecc71; }
-.event-item.health { border-left-color: #f39c12; }
-.event-item.other { border-left-color: #9b59b6; }
+.event-item:hover {
+    background: #2a2a2a;
+    transform: translateX(4px);
+}
+
+.event-item.work {
+    border-left-color: #e74c3c;
+}
+
+.event-item.study {
+    border-left-color: #3498db;
+}
+
+.event-item.personal {
+    border-left-color: #2ecc71;
+}
+
+.event-item.health {
+    border-left-color: #f39c12;
+}
+
+.event-item.other {
+    border-left-color: #9b59b6;
+}
 
 .event-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: #ffffff;
-    margin: 0 0 4px 0;
+    margin: 0;
 }
 
 .event-time {
-    font-size: 11px;
+    font-size: 12px;
     color: #888888;
     margin: 0;
 }
 
 .no-events {
     text-align: center;
-    color: #555555;
-    font-size: 13px;
-    padding: 32px 0;
+    color: #666666;
+    padding: 20px;
+    font-style: italic;
 }
 
-/* DISPLAY-BASED VIEW SWITCHING (prevents focus lock issues) */
+/* SIMPLIFIED VIEW SWITCHING */
 .calendar-grid-wrapper .month-view,
 .calendar-grid-wrapper .day-view,
 .calendar-grid-wrapper .week-view,
@@ -476,35 +511,38 @@ html, body {
     display: none;
     width: 100%;
     height: 100%;
-    /* Ensure proper layout when active */
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 /* Active views are fully visible */
 .calendar-grid-wrapper .month-view.active {
     display: block;
-    z-index: 10;
 }
 
 .calendar-grid-wrapper .day-view.active {
     display: flex;
     flex-direction: column;
-    z-index: 10;
 }
 
 .calendar-grid-wrapper .week-view.active {
     display: flex;
     flex-direction: column;
-    z-index: 10;
 }
 
 .calendar-grid-wrapper .year-view.active {
-    display: block;
-    overflow-y: auto;
-    padding: 24px;
-    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 12px 16px;
+    height: 100%;
+}
+
+.year-view-container {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    height: calc(100vh - 140px);
+    overflow: hidden;
+    justify-content: space-between;
 }
 
 .day-header-section {
@@ -533,29 +571,29 @@ html, body {
 }
 
 .time-slot {
+    display: grid;
+    grid-template-columns: 80px 1fr;
     height: 60px;
     border-bottom: 1px solid #1f1f1f;
-    display: flex;
-    position: relative;
 }
 
 .time-label {
-    width: 80px;
-    padding: 8px 16px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 11px;
     color: #666666;
-    border-right: 1px solid #1f1f1f;
-    display: flex;
-    align-items: flex-start;
+    text-align: center;
     background: #000000;
-    position: sticky;
-    left: 0;
-    z-index: 2;
+    border-right: 1px solid #1f1f1f;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
 }
 
 .time-content {
-    flex: 1;
     position: relative;
+    padding: 4px 12px;
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
@@ -565,47 +603,74 @@ html, body {
 }
 
 .day-event {
-    position: absolute;
-    left: 4px;
-    right: 4px;
-    background: rgba(74, 105, 189, 0.8);
+    background: rgba(74, 105, 189, 0.3);
     border: 1px solid #4a69bd;
     border-radius: 4px;
     padding: 4px 8px;
+    margin: 2px 0;
     font-size: 12px;
     color: #ffffff;
     cursor: pointer;
-    z-index: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
-.day-event.work { 
-    background: rgba(231, 76, 60, 0.8);
+.day-event:hover {
+    background: rgba(74, 105, 189, 0.5);
+    transform: translateY(-1px);
+}
+
+.day-event.work {
+    background: rgba(231, 76, 60, 0.3);
     border-color: #e74c3c;
 }
 
-.day-event.study { 
-    background: rgba(52, 152, 219, 0.8);
+.day-event.study {
+    background: rgba(52, 152, 219, 0.3);
     border-color: #3498db;
 }
 
-.day-event.personal { 
-    background: rgba(46, 204, 113, 0.8);
+.day-event.personal {
+    background: rgba(46, 204, 113, 0.3);
     border-color: #2ecc71;
 }
 
-.day-event.health { 
-    background: rgba(243, 156, 18, 0.8);
+.day-event.health {
+    background: rgba(243, 156, 18, 0.3);
     border-color: #f39c12;
 }
 
-.day-event.other { 
-    background: rgba(155, 89, 182, 0.8);
+.day-event.other {
+    background: rgba(155, 89, 182, 0.3);
     border-color: #9b59b6;
 }
 
+/* Day view specific styling */
+.day-header-section {
+    padding: 20px 24px;
+    background: #000000;
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.day-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+}
+
+.day-subtitle {
+    font-size: 14px;
+    color: #666666;
+    margin: 0;
+}
+
+.time-grid {
+    flex: 1;
+    overflow-y: auto;
+    background: #000000;
+}
+
+/* Week view styles */
 .week-header {
     display: grid;
     grid-template-columns: 80px repeat(7, 1fr);
@@ -623,6 +688,12 @@ html, body {
     text-align: center;
     border-right: 1px solid #1f1f1f;
     background: #000000;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.week-day-header:hover {
+    background: #0a0a0a;
 }
 
 .week-day-header:last-child {
@@ -674,47 +745,118 @@ html, body {
     border-right: none;
 }
 
+/* Year view styles */
 .year-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 12px;
+    padding: 0 16px;
 }
 
 .year-title {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 600;
     color: #ffffff;
+    margin: 0 0 12px 0;
+}
+
+/* Hide calendar navigation in year view */
+.calendar-main.year-view-active .calendar-nav {
+    display: none;
+}
+
+/* Yearly Overview Section */
+.yearly-overview {
+    background: #0d0d0d;
+    border: 1px solid #1f1f1f;
+    border-radius: 8px;
+    padding: 12px;
+    flex: 1;
+    overflow-y: auto;
+    height: 100%;
+    max-width: 25%;
+    min-width: 250px;
+}
+
+.yearly-overview h3 {
+    color: #ffffff;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    text-align: center;
+    border-bottom: 1px solid #1f1f1f;
+    padding-bottom: 8px;
+}
+
+.yearly-goals {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.goal-item {
+    background: #1a1a1a;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    padding: 6px;
+    border-left: 3px solid #4a69bd;
+    margin-bottom: 6px;
+}
+
+.goal-title {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+}
+
+.goal-deadline {
+    color: #888888;
+    font-size: 11px;
     margin: 0;
+}
+
+.days-left {
+    color: #f39c12;
+    font-weight: 600;
 }
 
 .year-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    flex: 3;
+    overflow: hidden;
+    max-width: 75%;
 }
 
 .mini-month {
     background: #0d0d0d;
     border: 1px solid #1f1f1f;
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: 4px;
+    padding: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
+    height: 100%;
+    max-height: 130px;
+    display: flex;
+    flex-direction: column;
 }
 
 .mini-month:hover {
     background: #1a1a1a;
     border-color: #333333;
+    transform: translateY(-1px);
 }
 
 .mini-month-header {
     text-align: center;
-    margin-bottom: 12px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #1f1f1f;
+    padding-bottom: 2px;
 }
 
 .mini-month-name {
-    font-size: 16px;
+    font-size: 11px;
     font-weight: 600;
     color: #ffffff;
     margin: 0;
@@ -723,15 +865,18 @@ html, body {
 .mini-calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
+    gap: 0;
+    margin-top: 4px;
+    flex: 1;
 }
 
 .mini-day-header {
     text-align: center;
-    font-size: 10px;
+    font-size: 8px;
     color: #666666;
-    padding: 4px 2px;
+    padding: 1px 0;
     text-transform: uppercase;
+    font-weight: 500;
 }
 
 .mini-day {
@@ -739,20 +884,25 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 7px;
     color: #ffffff;
-    border-radius: 3px;
+    border-radius: 1px;
     cursor: pointer;
     transition: all 0.15s ease;
     position: relative;
+    min-height: 10px;
+    max-height: 14px;
+    line-height: 1;
+    padding: 0;
 }
 
-.mini-day:hover {
+.mini-day:hover:not(.other-month) {
     background: #1f1f1f;
 }
 
 .mini-day.other-month {
     color: #333333;
+    cursor: default;
 }
 
 .mini-day.today {
@@ -777,57 +927,44 @@ html, body {
     background: #ffffff;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 300px;
+/* Media queries for responsive year view */
+@media (max-width: 1200px) {
+    .year-grid {
+        max-width: 70%;
     }
     
-    .year-grid {
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
+    .yearly-overview {
+        max-width: 30%;
     }
 }
 
-@media (max-width: 768px) {
-    .calendar-main {
+@media (max-width: 992px) {
+    .year-view-container {
         flex-direction: column;
     }
     
-    .sidebar {
-        width: 100%;
-        height: 40vh;
-        border-left: none;
-        border-top: 1px solid #1f1f1f;
-    }
-    
-    .calendar-section {
-        height: 60vh;
-    }
-    
-    .week-header {
-        grid-template-columns: 60px repeat(7, 1fr);
-    }
-    
-    .week-time-row {
-        grid-template-columns: 60px repeat(7, 1fr);
-    }
-    
-    .time-label {
-        width: 60px;
-        padding: 8px 8px;
-        font-size: 10px;
-    }
-    
-    .year-view {
-        padding: 16px;
-    }
-    
     .year-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+        max-width: 100%;
+        margin-bottom: 16px;
+    }
+    
+    .yearly-overview {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .yearly-goals {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
+
+@media (max-width: 576px) {
+    .yearly-goals {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Responsive adjustments */
 </style>
 {% endblock %}
 
@@ -837,7 +974,6 @@ html, body {
     <div class="calendar-section">
         <!-- Top Header -->
         <div class="top-header">
-            <h1 class="header-title">Calendar</h1>
             <div class="header-controls">
                 <div class="view-switcher" role="tablist" aria-label="Calendar view options">
                     <button class="view-btn" data-view="day" role="tab" aria-controls="day-view" id="day-tab">Day</button>
@@ -861,10 +997,6 @@ html, body {
 
         <!-- Calendar Views -->
         <div class="calendar-grid-wrapper">
-            <!-- Debug indicator -->
-            <div id="debugIndicator" style="position: absolute; top: 10px; right: 10px; background: #4a69bd; color: white; padding: 8px; border-radius: 4px; z-index: 100; font-size: 12px;">
-                Month View Active
-            </div>
             
             <!-- Month Grid View (Default) -->
             <div class="month-view active" id="month-view" role="tabpanel" aria-labelledby="month-tab">
@@ -889,18 +1021,17 @@ html, body {
                     <p class="day-subtitle">Today</p>
                 </div>
                 <div class="time-grid" id="dayTimeGrid">
-                    <p style="color: #888; padding: 20px; text-align: center;">Day content will be generated here...</p>
+                    <!-- Day time grid content will be generated by JavaScript -->
                 </div>
             </div>
 
             <!-- Week View -->
             <div class="week-view" id="week-view" role="tabpanel" aria-labelledby="week-tab">
                 <div class="week-header" id="weekHeader">
-                    <div class="week-time-header"></div>
-                    <p style="color: #888; padding: 20px;">Week headers will be generated here...</p>
+                    <!-- Week header content will be generated by JavaScript -->
                 </div>
                 <div class="week-grid" id="weekGrid">
-                    <p style="color: #888; padding: 20px; text-align: center;">Week content will be generated here...</p>
+                    <!-- Week grid content will be generated by JavaScript -->
                 </div>
             </div>
 
@@ -909,8 +1040,16 @@ html, body {
                 <div class="year-header">
                     <h2 class="year-title" id="yearTitle">2023</h2>
                 </div>
-                <div class="year-grid" id="yearGrid">
-                    <p style="color: #888; padding: 20px; text-align: center;">Year content will be generated here...</p>
+                <div class="year-view-container">
+                    <div class="year-grid" id="yearGrid">
+                        <!-- Year grid content will be generated by JavaScript -->
+                    </div>
+                    <div class="yearly-overview">
+                        <h3>Yearly Overview</h3>
+                        <div class="yearly-goals" id="yearlyGoals">
+                            <!-- Yearly goals will be populated by JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -920,12 +1059,12 @@ html, body {
     <div class="sidebar">
         <!-- Sidebar Header -->
         <div class="sidebar-header">
-            <h2 class="sidebar-title">Today</h2>
+            <h2 class="sidebar-title" id="sidebarTitle">Today</h2>
             <p class="selected-date" id="selectedDate">January 15, 2024</p>
         </div>
 
-        <!-- Quick Add Form -->
-        <div class="quick-add">
+        <!-- Quick Add Form - Only show for Day view -->
+        <div class="quick-add" id="quickAddSection">
             <h3>Quick Add</h3>
             <form id="quickAddForm">
                 <div class="form-group">
@@ -955,7 +1094,7 @@ html, body {
 
         <!-- Events List -->
         <div class="events-section">
-            <h3>Events & Tasks</h3>
+            <h3 id="eventsTitle">Events & Tasks</h3>
             <div id="eventsList">
                 <div class="no-events">No events for this day</div>
             </div>
@@ -966,11 +1105,9 @@ html, body {
 
 {% block extra_js %}
 <script>
-console.log("Calendar script loading...");
-
-// Simple logging function
+// Simple logging function - REMOVED DEBUG MESSAGES
 function log(message) {
-    console.log("[Calendar] " + message);
+    // Debug messages removed for production
 }
 
 // Current date for navigation
@@ -994,22 +1131,71 @@ function generateTimeSlots() {
     return slots;
 }
 
-// Generate week view content
+
+
+// IMPROVED DAY VIEW GENERATION
+function generateDayView() {
+    const dayTimeGrid = document.getElementById('dayTimeGrid');
+    const dayTitle = document.getElementById('dayTitle');
+    
+    if (!dayTimeGrid || !dayTitle) {
+        return;
+    }
+    
+    // Update title
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dayTitle.textContent = currentDate.toLocaleDateString('en-US', options);
+    
+    // Generate time slots
+    let html = '';
+    for (let hour = 6; hour <= 23; hour++) {
+        const time12 = hour === 12 ? '12 PM' : 
+                      hour < 12 ? `${hour} AM` : 
+                      `${hour - 12} PM`;
+        
+        html += `
+            <div class="time-slot" data-hour="${hour}">
+                <div class="time-label">${time12}</div>
+                <div class="time-content">
+                    ${hour === 10 ? '<div class="day-event work">Team Meeting</div>' : ''}
+                    ${hour === 14 ? '<div class="day-event personal">Lunch Break</div>' : ''}
+                    ${hour === 16 ? '<div class="day-event study">Study Time</div>' : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    dayTimeGrid.innerHTML = html;
+    
+    // Add click handlers for time slots
+    dayTimeGrid.querySelectorAll('.time-content').forEach(slot => {
+        slot.addEventListener('click', function() {
+            const hour = this.parentElement.getAttribute('data-hour');
+            const eventTitle = prompt(`Create event for ${hour}:00?`);
+            if (eventTitle) {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'day-event work';
+                eventDiv.textContent = eventTitle;
+                this.appendChild(eventDiv);
+            }
+        });
+    });
+}
+
+// IMPROVED WEEK VIEW GENERATION
 function generateWeekView() {
-    log("generateWeekView() called");
     const weekHeader = document.getElementById('weekHeader');
     const weekGrid = document.getElementById('weekGrid');
     
     if (!weekHeader || !weekGrid) {
-        log("ERROR: Missing week view elements");
         return;
     }
     
-    // Get start of week
+    // Get start of week (Sunday)
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
     
-    // Generate simple week header
+    // Generate week header
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let headerHtml = '<div class="week-time-header"></div>';
     
@@ -1028,139 +1214,221 @@ function generateWeekView() {
     
     weekHeader.innerHTML = headerHtml;
     
-    // Generate simple week grid
+    // Generate week grid
     let gridHtml = '';
-    for (let hour = 8; hour < 18; hour++) {
-        const time12 = hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+    for (let hour = 6; hour <= 23; hour++) {
+        const time12 = hour === 12 ? '12 PM' : 
+                      hour < 12 ? `${hour} AM` : 
+                      `${hour - 12} PM`;
+        
         gridHtml += `
             <div class="week-time-row">
                 <div class="time-label">${time12}</div>
                 ${Array.from({length: 7}, (_, dayIndex) => {
                     let eventHtml = '';
+                    // Sample events
                     if (hour === 10 && dayIndex === 1) {
-                        eventHtml = '<div class="day-event work" style="top: 0; height: 30px;">Meeting</div>';
+                        eventHtml = '<div class="day-event work">Meeting</div>';
+                    } else if (hour === 14 && dayIndex === 3) {
+                        eventHtml = '<div class="day-event personal">Lunch</div>';
+                    } else if (hour === 16 && dayIndex === 5) {
+                        eventHtml = '<div class="day-event study">Study</div>';
                     }
-                    return `<div class="week-time-cell">${eventHtml}</div>`;
+                    
+                    return `<div class="week-time-cell" data-hour="${hour}" data-day="${dayIndex}">${eventHtml}</div>`;
                 }).join('')}
             </div>
         `;
     }
     
     weekGrid.innerHTML = gridHtml;
-    log("Week view content generated successfully");
+    
+    // Add click handlers for week cells
+    weekGrid.querySelectorAll('.week-time-cell').forEach(cell => {
+        cell.addEventListener('click', function() {
+            const hour = this.getAttribute('data-hour');
+            const dayIndex = this.getAttribute('data-day');
+            
+            // Calculate the actual date for this day
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            const selectedWeekDate = new Date(startOfWeek);
+            selectedWeekDate.setDate(startOfWeek.getDate() + parseInt(dayIndex));
+            
+            // Update sidebar for selected day
+            updateSidebarForSelectedDay(selectedWeekDate);
+            
+            const eventTitle = prompt(`Create event for ${hour}:00?`);
+            if (eventTitle) {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'day-event work';
+                eventDiv.textContent = eventTitle;
+                this.appendChild(eventDiv);
+            }
+        });
+    });
+    
+    // Add click handlers for week day headers
+    weekHeader.querySelectorAll('.week-day-header').forEach((dayHeader, index) => {
+        dayHeader.addEventListener('click', function() {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            const selectedWeekDate = new Date(startOfWeek);
+            selectedWeekDate.setDate(startOfWeek.getDate() + index);
+            
+            updateSidebarForSelectedDay(selectedWeekDate);
+        });
+    });
 }
 
-// Generate day view content
-function generateDayView() {
-    log("generateDayView() called");
-    const dayTimeGrid = document.getElementById('dayTimeGrid');
-    const dayTitle = document.getElementById('dayTitle');
-    
-    if (!dayTimeGrid || !dayTitle) {
-        log("ERROR: Missing day view elements");
-        return;
-    }
-    
-    // Update title
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dayTitle.textContent = currentDate.toLocaleDateString('en-US', options);
-    
-    // Generate simple time slots
-    let html = '';
-    for (let hour = 8; hour < 18; hour++) {
-        const time12 = hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
-        html += `
-            <div class="time-slot">
-                <div class="time-label">${time12}</div>
-                <div class="time-content">
-                    ${hour === 10 ? '<div class="day-event work" style="top: 5px; height: 40px;">Team Meeting</div>' : ''}
-                    ${hour === 14 ? '<div class="day-event personal" style="top: 10px; height: 35px;">Lunch Break</div>' : ''}
-                </div>
-            </div>
-        `;
-    }
-    
-    dayTimeGrid.innerHTML = html;
-    log("Day view content generated successfully");
-}
-
-// Generate year view content
+// IMPROVED YEAR VIEW GENERATION
 function generateYearView() {
-    log("generateYearView() called");
     const yearGrid = document.getElementById('yearGrid');
     const yearTitle = document.getElementById('yearTitle');
+    const yearlyGoals = document.getElementById('yearlyGoals');
     
-    if (!yearGrid || !yearTitle) {
-        log("ERROR: Missing year view elements");
+    if (!yearGrid || !yearTitle || !yearlyGoals) {
         return;
     }
     
     // Update year title
-    yearTitle.textContent = currentDate.getFullYear();
+    const year = currentDate.getFullYear();
+    yearTitle.textContent = year;
     
-    // Generate simple year grid
+    // Generate yearly goals
+    generateYearlyGoals(year);
+    
+    // Generate 12 months
     const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
     
-    let html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">';
+    let html = '';
     
     monthNames.forEach((month, index) => {
         html += `
-            <div class="mini-month">
+            <div class="mini-month" data-month="${index}">
                 <div class="mini-month-header">
                     <h3 class="mini-month-name">${month}</h3>
                 </div>
-                <div style="text-align: center; color: #888; padding: 20px;">
-                    Calendar for ${month}
+                <div class="mini-calendar">
+                    <div class="mini-day-header">S</div>
+                    <div class="mini-day-header">M</div>
+                    <div class="mini-day-header">T</div>
+                    <div class="mini-day-header">W</div>
+                    <div class="mini-day-header">T</div>
+                    <div class="mini-day-header">F</div>
+                    <div class="mini-day-header">S</div>
+                    
+                    ${generateMiniMonthDays(year, index)}
                 </div>
             </div>
         `;
     });
     
-    html += '</div>';
     yearGrid.innerHTML = html;
-    log("Year view content generated successfully");
+    
+    // Add click handlers for mini months
+    yearGrid.querySelectorAll('.mini-month').forEach(monthEl => {
+        monthEl.addEventListener('click', function(e) {
+            // Check if clicked on a specific date
+            if (e.target.classList.contains('mini-day') && !e.target.classList.contains('other-month')) {
+                const dateStr = e.target.getAttribute('data-date');
+                if (dateStr) {
+                    const [year, month, day] = dateStr.split('-');
+                    currentDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    switchView('day');
+                    updateDateDisplay();
+                    return;
+                }
+            }
+            
+            // Otherwise, switch to month view for that month
+            const monthIndex = parseInt(this.getAttribute('data-month'));
+            currentDate.setMonth(monthIndex);
+            switchView('month');
+            updateDateDisplay();
+        });
+    });
+    
+    // Add individual date click handlers
+    yearGrid.querySelectorAll('.mini-day').forEach(dayEl => {
+        dayEl.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (!this.classList.contains('other-month')) {
+                const dateStr = this.getAttribute('data-date');
+                if (dateStr) {
+                    const [year, month, day] = dateStr.split('-');
+                    currentDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    switchView('day');
+                    updateDateDisplay();
+                }
+            }
+        });
+    });
 }
 
 // Generate days for mini month calendar
 function generateMiniMonthDays(year, month) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday, 1 = Monday, etc.
     
-    let days = '';
-    for (let i = 0; i < 42; i++) {
-        const day = new Date(startDate);
-        day.setDate(startDate.getDate() + i);
-        
-        const isCurrentMonth = day.getMonth() === month;
-        const isToday = day.toDateString() === new Date().toDateString();
-        
-        days += `<div class="mini-day ${!isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}">${day.getDate()}</div>`;
+    let html = '';
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+        html += '<div class="mini-day other-month"></div>';
     }
-    return days;
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayDate = new Date(year, month, day);
+        const isToday = dayDate.toDateString() === new Date().toDateString();
+        const hasEvents = Math.random() < 0.15; // 15% chance of having events (sample)
+        
+        html += `
+            <div class="mini-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}" 
+                 data-date="${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}">
+                ${day}
+            </div>
+        `;
+    }
+    
+    // Add empty cells to complete the 6-week grid (42 cells total)
+    const totalCells = startingDayOfWeek + daysInMonth;
+    const remainingCells = 42 - totalCells;
+    for (let i = 0; i < remainingCells; i++) {
+        html += '<div class="mini-day other-month"></div>';
+    }
+    
+    return html;
 }
 
-// Simple view switching function
+// FIXED VIEW SWITCHING FUNCTION
 function switchView(view) {
-    log("=== Switching to view: " + view + " ===");
     currentView = view;
     
     // Update button states
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.classList.remove('active');
-        btn.setAttribute('aria-selected', 'false');
         if (btn.getAttribute('data-view') === view) {
             btn.classList.add('active');
-            btn.setAttribute('aria-selected', 'true');
-            log("Activated button for: " + view);
         }
     });
     
-    // Hide all views and show selected view
+    // Toggle sidebar visibility and main layout for year view
+    const calendarMain = document.querySelector('.calendar-main');
+    if (view === 'year') {
+        calendarMain.classList.add('year-view-active');
+    } else {
+        calendarMain.classList.remove('year-view-active');
+    }
+    
+    // Hide all views
     document.querySelectorAll('.month-view, .day-view, .week-view, .year-view').forEach(viewEl => {
         viewEl.classList.remove('active');
     });
@@ -1169,40 +1437,180 @@ function switchView(view) {
     const viewElement = document.querySelector(`.${view}-view`);
     if (viewElement) {
         viewElement.classList.add('active');
-        log("Added active to: " + viewElement.className);
         
-        // Update debug indicator
-        const debugIndicator = document.getElementById('debugIndicator');
-        if (debugIndicator) {
-            debugIndicator.textContent = view.charAt(0).toUpperCase() + view.slice(1) + ' View Active';
-            debugIndicator.style.background = 
-                view === 'day' ? '#e74c3c' :
-                view === 'week' ? '#2ecc71' :
-                view === 'year' ? '#f39c12' : '#4a69bd';
+        // Generate content for the view
+        if (view === 'day') {
+            generateDayView();
+        } else if (view === 'week') {
+            generateWeekView();
+        } else if (view === 'year') {
+            generateYearView();
+        } else if (view === 'month') {
+            generateMonthView();
         }
         
-        // Generate content
-        setTimeout(() => {
-            log("Generating content for: " + view);
-            switch(view) {
-                case 'day':
-                    generateDayView();
-                    break;
-                case 'week':
-                    generateWeekView();
-                    break;
-                case 'year':
-                    generateYearView();
-                    break;
-                case 'month':
-                    log("Month view doesn't need content generation");
-                    break;
-                default:
-                    log("Unknown view: " + view);
-            }
-        }, 50);
-    } else {
-        log("ERROR: View element not found: ." + view + "-view");
+        // Update sidebar content based on view (only if not year view)
+        if (view !== 'year') {
+            updateSidebarForView(view);
+        }
+    }
+}
+
+// Update sidebar content based on current view
+function updateSidebarForView(view) {
+    const sidebarTitle = document.getElementById('sidebarTitle');
+    const quickAddSection = document.getElementById('quickAddSection');
+    const eventsTitle = document.getElementById('eventsTitle');
+    const selectedDate = document.getElementById('selectedDate');
+    
+    switch(view) {
+        case 'day':
+            sidebarTitle.textContent = 'Today';
+            quickAddSection.style.display = 'block';
+            eventsTitle.textContent = 'Events & Tasks';
+            selectedDate.textContent = currentDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            break;
+            
+        case 'week':
+            sidebarTitle.textContent = 'Selected Day';
+            quickAddSection.style.display = 'none';
+            eventsTitle.textContent = 'Day Details';
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            selectedDate.textContent = `Week of ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            updateEventsListForWeek();
+            break;
+            
+        case 'month':
+            sidebarTitle.textContent = 'Selected Date';
+            quickAddSection.style.display = 'none';
+            eventsTitle.textContent = 'Date Details';
+            selectedDate.textContent = currentDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            updateEventsListForMonth();
+            break;
+            
+        case 'year':
+            sidebarTitle.textContent = 'Year Overview';
+            quickAddSection.style.display = 'none';
+            eventsTitle.textContent = 'Quick Stats';
+            selectedDate.textContent = currentDate.getFullYear().toString();
+            updateEventsListForYear();
+            break;
+    }
+}
+
+// Update events list for week view
+function updateEventsListForWeek() {
+    const eventsList = document.getElementById('eventsList');
+    eventsList.innerHTML = `
+        <div style="color: #888; padding: 16px; text-align: center;">
+            <p>Click on a day in the week view to see events for that day</p>
+        </div>
+    `;
+}
+
+// Update events list for month view  
+function updateEventsListForMonth() {
+    const eventsList = document.getElementById('eventsList');
+    eventsList.innerHTML = `
+        <div style="color: #888; padding: 16px; text-align: center;">
+            <p>Click on a date in the month view to see events for that day</p>
+        </div>
+    `;
+}
+
+// Update events list for year view
+function updateEventsListForYear() {
+    const eventsList = document.getElementById('eventsList');
+    eventsList.innerHTML = `
+        <div style="color: #888; padding: 16px;">
+            <h4 style="color: #fff; margin-bottom: 12px;">Year ${currentDate.getFullYear()}</h4>
+            <p style="margin-bottom: 8px;">Total Months: 12</p>
+            <p style="margin-bottom: 8px;">Days: ${new Date(currentDate.getFullYear(), 11, 31).getDate() === 31 ? '365' : '366'}</p>
+            <p>Click on any month to view its calendar</p>
+        </div>
+    `;
+}
+
+// Generate month view content
+function generateMonthView() {
+    const calendarGrid = document.getElementById('calendarGrid');
+    if (!calendarGrid) return;
+    
+    const today = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Clear existing content except headers
+    const existingCells = calendarGrid.querySelectorAll('.calendar-day');
+    existingCells.forEach(cell => cell.remove());
+    
+    // Calculate first day of month and days in month
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    // Add previous month's trailing days
+    const prevMonth = new Date(year, month, 0);
+    const daysInPrevMonth = prevMonth.getDate();
+    
+    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+        const dayNum = daysInPrevMonth - i;
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.innerHTML = `<div class="day-number">${dayNum}</div>`;
+        calendarGrid.appendChild(dayElement);
+    }
+    
+    // Add current month's days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        const isToday = (year === today.getFullYear() && month === today.getMonth() && day === today.getDate());
+        
+        dayElement.className = `calendar-day ${isToday ? 'today' : ''}`;
+        dayElement.innerHTML = `
+            <div class="day-number">${day}</div>
+            <div class="event-dots"></div>
+        `;
+        
+        // Add click handler
+        dayElement.addEventListener('click', function() {
+            // Remove selected class from all days
+            document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+            // Add selected class to clicked day
+            this.classList.add('selected');
+            
+            // Calculate selected date
+            const selectedDate = new Date(year, month, day);
+            
+            // Update sidebar for selected day
+            updateSidebarForSelectedDay(selectedDate);
+        });
+        
+        calendarGrid.appendChild(dayElement);
+    }
+    
+    // Add next month's leading days
+    const totalCells = calendarGrid.children.length - 7; // Subtract headers
+    const remainingCells = 42 - totalCells; // 6 weeks * 7 days
+    
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.innerHTML = `<div class="day-number">${day}</div>`;
+        calendarGrid.appendChild(dayElement);
     }
 }
 
@@ -1262,46 +1670,222 @@ function updateDateDisplay() {
 
 // Set up event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    log("=== DOM Ready - Setting up calendar ===");
-    
-    // Test element existence
-    const testElements = ['dayTimeGrid', 'dayTitle', 'weekGrid', 'weekHeader', 'yearGrid', 'yearTitle'];
-    testElements.forEach(id => {
-        const element = document.getElementById(id);
-        log(`Element ${id}: ${element ? 'FOUND' : 'NOT FOUND'}`);
-    });
-    
     // Add click handlers to view buttons
     document.querySelectorAll('.view-btn').forEach(button => {
         button.addEventListener('click', function(event) {
-            // Prevent any default behavior
             event.preventDefault();
             event.stopPropagation();
             
             const view = this.getAttribute('data-view');
-            log("View button clicked: " + view);
-            
-            // Update aria-selected for accessibility
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.setAttribute('aria-selected', 'false');
-            });
-            this.setAttribute('aria-selected', 'true');
             
             switchView(view);
             updateDateDisplay();
         });
-        
-        // Initialize aria-selected
-        button.setAttribute('aria-selected', button.classList.contains('active') ? 'true' : 'false');
     });
     
-    log("Event listeners attached to " + document.querySelectorAll('.view-btn').length + " buttons");
+    // Add navigation button handlers
+    document.getElementById('prevBtn').addEventListener('click', previousMonth);
+    document.getElementById('nextBtn').addEventListener('click', nextMonth);
     
-    // Initialize month view
+    // Add event listener for color options in quick add form
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+    
+    // Add event listener for quick add form
+    const quickAddForm = document.getElementById('quickAddForm');
+    if (quickAddForm) {
+        quickAddForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('eventTitle').value;
+            const time = document.getElementById('eventTime').value;
+            const category = document.querySelector('.color-option.selected')?.getAttribute('data-category') || 'work';
+            
+            if (title) {
+                alert(`Event "${title}" would be added for ${time} in category ${category}`);
+                this.reset();
+                // Reset color selection
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                document.querySelector('.color-option.work').classList.add('selected');
+            }
+        });
+    }
+    
+    // Initialize with month view
     switchView('month');
     updateDateDisplay();
-    
-    log("=== Calendar setup complete ===");
 });
+
+// Update sidebar for a selected day (used in week and month views)
+function updateSidebarForSelectedDay(selectedDate) {
+    const sidebarTitle = document.getElementById('sidebarTitle');
+    const selectedDateEl = document.getElementById('selectedDate');
+    const eventsList = document.getElementById('eventsList');
+    const eventsTitle = document.getElementById('eventsTitle');
+    
+    // Update sidebar header
+    if (isToday(selectedDate)) {
+        sidebarTitle.textContent = 'Today';
+    } else if (isTomorrow(selectedDate)) {
+        sidebarTitle.textContent = 'Tomorrow';
+    } else if (isYesterday(selectedDate)) {
+        sidebarTitle.textContent = 'Yesterday';
+    } else {
+        sidebarTitle.textContent = 'Selected Day';
+    }
+    
+    selectedDateEl.textContent = selectedDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    eventsTitle.textContent = 'Events & Tasks';
+    
+    // Sample events for the selected day (you can replace this with real data)
+    const sampleEvents = generateSampleEventsForDate(selectedDate);
+    
+    if (sampleEvents.length > 0) {
+        let eventsHtml = '';
+        sampleEvents.forEach(event => {
+            eventsHtml += `
+                <div class="event-item ${event.category}">
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-time">${event.time}</div>
+                </div>
+            `;
+        });
+        eventsList.innerHTML = eventsHtml;
+    } else {
+        eventsList.innerHTML = '<div class="no-events">No events for this day</div>';
+    }
+}
+
+// Helper functions for date comparison
+function isToday(date) {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+}
+
+function isTomorrow(date) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return date.toDateString() === tomorrow.toDateString();
+}
+
+function isYesterday(date) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return date.toDateString() === yesterday.toDateString();
+}
+
+// Generate sample events for a date (replace with real data fetching)
+function generateSampleEventsForDate(date) {
+    const events = [];
+    const dayOfWeek = date.getDay();
+    
+    // Add some sample events based on the day
+    if (dayOfWeek === 1) { // Monday
+        events.push({ title: 'Team Meeting', time: '10:00 AM', category: 'work' });
+        events.push({ title: 'Lunch Break', time: '12:30 PM', category: 'personal' });
+    } else if (dayOfWeek === 3) { // Wednesday
+        events.push({ title: 'Gym Session', time: '6:00 PM', category: 'health' });
+    } else if (dayOfWeek === 5) { // Friday
+        events.push({ title: 'Project Review', time: '2:00 PM', category: 'work' });
+        events.push({ title: 'Movie Night', time: '8:00 PM', category: 'personal' });
+    }
+    
+    return events;
+}
+
+// Generate yearly goals with deadlines
+function generateYearlyGoals(year) {
+    const yearlyGoals = document.getElementById('yearlyGoals');
+    if (!yearlyGoals) return;
+    
+    // Calculate days left in the year
+    const now = new Date();
+    const endOfYear = new Date(year, 11, 31);
+    const daysLeft = Math.ceil((endOfYear - now) / (1000 * 60 * 60 * 24));
+    
+    // Add days left in year at the top
+    yearlyGoals.innerHTML = `
+        <div class="goal-item" style="background: #111; text-align: center; margin-bottom: 12px;">
+            <div class="goal-title">Days left in ${year}</div>
+            <div style="font-size: 18px; color: #f39c12; font-weight: 600; margin-top: 4px;">${daysLeft} days</div>
+        </div>
+    `;
+    
+    // Sample yearly goals (you can replace with real data)
+    const goals = [
+        {
+            title: 'Complete Full-Stack Development Certification',
+            deadline: `${year}-06-30`,
+            category: 'study'
+        },
+        {
+            title: 'Launch Personal Portfolio Website',
+            deadline: `${year}-08-15`,
+            category: 'work'
+        },
+        {
+            title: 'Read 24 Books This Year',
+            deadline: `${year}-12-31`,
+            category: 'personal'
+        },
+        {
+            title: 'Complete Marathon Training',
+            deadline: `${year}-10-01`,
+            category: 'health'
+        }
+    ];
+    
+    let html = yearlyGoals.innerHTML;
+    
+    // Set color based on category
+    const categoryColors = {
+        'study': '#3498db',
+        'work': '#9b59b6',
+        'personal': '#2ecc71',
+        'health': '#e67e22'
+    };
+    
+    goals.forEach(goal => {
+        const deadlineDate = new Date(goal.deadline);
+        const timeDiff = deadlineDate - now;
+        const daysUntilDeadline = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        
+        let deadlineText = '';
+        if (daysUntilDeadline > 0) {
+            deadlineText = `<span class="days-left">${daysUntilDeadline} days left</span>`;
+        } else if (daysUntilDeadline === 0) {
+            deadlineText = '<span class="days-left">Due today!</span>';
+        } else {
+            deadlineText = '<span style="color: #e74c3c;">Overdue</span>';
+        }
+        
+        const borderColor = categoryColors[goal.category] || '#4a69bd';
+        
+        html += `
+            <div class="goal-item" style="border-left: 3px solid ${borderColor};">
+                <div class="goal-title">${goal.title}</div>
+                <div class="goal-deadline">
+                    Deadline: ${deadlineDate.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric' 
+                    })} - ${deadlineText}
+                </div>
+            </div>
+        `;
+    });
+    
+    yearlyGoals.innerHTML = html;
+}
 </script>
 {% endblock %}
