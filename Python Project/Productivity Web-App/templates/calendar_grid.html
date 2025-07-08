@@ -1,0 +1,1307 @@
+ {% extends "base.html" %}
+
+{% block title %}Calendar - Productivity Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Reset and base styles for full-window layout */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000000;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Main container - full viewport */
+.calendar-main {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: #000000;
+}
+
+/* Calendar section - left side */
+.calendar-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #000000;
+}
+
+/* Sidebar - right side */
+.sidebar {
+    width: 350px;
+    background: #0d0d0d;
+    border-left: 1px solid #1f1f1f;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Top navigation header */
+.top-header {
+    height: 64px;
+    background: #000000;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Calendar navigation */
+.calendar-nav {
+    height: 72px;
+    background: #000000;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-arrows {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-arrow {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.nav-arrow:hover {
+    background: #1f1f1f;
+    border-color: #4a5568;
+}
+
+.current-date {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* View switcher */
+.view-switcher {
+    display: flex;
+    background: #1f1f1f;
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.view-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    color: #888888;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn.active {
+    background: #ffffff;
+    color: #000000;
+}
+
+.view-btn:hover:not(.active) {
+    color: #ffffff;
+}
+
+/* Calendar grid container - NEW APPROACH */
+.calendar-grid-wrapper {
+    flex: 1;
+    padding: 0;
+    background: #000000;
+    overflow: hidden;
+    position: relative; /* Important for absolute positioning */
+}
+
+/* Calendar grid */
+.calendar-grid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 40px repeat(6, 1fr);
+    background: #000000;
+}
+
+/* Day headers */
+.day-header {
+    background: #000000;
+    border-right: 1px solid #1f1f1f;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.day-header:last-child {
+    border-right: none;
+}
+
+/* Calendar day cells */
+.calendar-day {
+    background: #000000;
+    border-right: 1px solid #1f1f1f;
+    border-bottom: 1px solid #1f1f1f;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    overflow: hidden;
+}
+
+.calendar-day:last-child {
+    border-right: none;
+}
+
+.calendar-day:nth-child(7n):not(.day-header) {
+    border-right: none;
+}
+
+.calendar-day:hover {
+    background: #0a0a0a;
+}
+
+.calendar-day.selected {
+    background: #1a1a2e;
+    border-color: #4a69bd;
+}
+
+.calendar-day.other-month {
+    color: #333333;
+    background: #000000;
+}
+
+.calendar-day.today {
+    background: #0f0f23;
+}
+
+/* Day number */
+.day-number {
+    font-size: 13px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 2;
+}
+
+.calendar-day.other-month .day-number {
+    color: #333333;
+}
+
+.calendar-day.today .day-number {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Event dots */
+.event-dots {
+    position: absolute;
+    bottom: 4px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.event-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #4a69bd;
+}
+
+.event-dot.work { background: #e74c3c; }
+.event-dot.study { background: #3498db; }
+.event-dot.personal { background: #2ecc71; }
+.event-dot.health { background: #f39c12; }
+.event-dot.other { background: #9b59b6; }
+
+/* Event blocks for time-blocking */
+.event-block {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    background: rgba(74, 105, 189, 0.3);
+    border: 1px solid #4a69bd;
+    border-radius: 3px;
+    font-size: 10px;
+    padding: 2px 4px;
+    color: #ffffff;
+    z-index: 1;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.event-block.work { 
+    background: rgba(231, 76, 60, 0.3);
+    border-color: #e74c3c;
+}
+
+.event-block.study { 
+    background: rgba(52, 152, 219, 0.3);
+    border-color: #3498db;
+}
+
+.event-block.personal { 
+    background: rgba(46, 204, 113, 0.3);
+    border-color: #2ecc71;
+}
+
+.event-block.health { 
+    background: rgba(243, 156, 18, 0.3);
+    border-color: #f39c12;
+}
+
+.event-block.other { 
+    background: rgba(155, 89, 182, 0.3);
+    border-color: #9b59b6;
+}
+
+/* Sidebar styles */
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+}
+
+.selected-date {
+    font-size: 13px;
+    color: #888888;
+    margin: 0;
+}
+
+/* Quick add form */
+.quick-add {
+    padding: 24px;
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.quick-add h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888888;
+    margin-bottom: 4px;
+}
+
+.form-control {
+    width: 100%;
+    background: #1f1f1f;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #ffffff;
+    font-size: 13px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4a69bd;
+    background: #252525;
+}
+
+.form-control::placeholder {
+    color: #555555;
+}
+
+/* Color picker */
+.color-options {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.color-option {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.color-option.work { background: #e74c3c; }
+.color-option.study { background: #3498db; }
+.color-option.personal { background: #2ecc71; }
+.color-option.health { background: #f39c12; }
+.color-option.other { background: #9b59b6; }
+
+.color-option.selected {
+    border-color: #ffffff;
+    transform: scale(1.1);
+}
+
+.add-btn {
+    width: 100%;
+    background: #4a69bd;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-top: 8px;
+}
+
+.add-btn:hover {
+    background: #3d5a99;
+}
+
+/* Events list */
+.events-section {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.events-section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+}
+
+.event-item {
+    background: #1f1f1f;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid #4a69bd;
+}
+
+.event-item.work { border-left-color: #e74c3c; }
+.event-item.study { border-left-color: #3498db; }
+.event-item.personal { border-left-color: #2ecc71; }
+.event-item.health { border-left-color: #f39c12; }
+.event-item.other { border-left-color: #9b59b6; }
+
+.event-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+}
+
+.event-time {
+    font-size: 11px;
+    color: #888888;
+    margin: 0;
+}
+
+.no-events {
+    text-align: center;
+    color: #555555;
+    font-size: 13px;
+    padding: 32px 0;
+}
+
+/* DISPLAY-BASED VIEW SWITCHING (prevents focus lock issues) */
+.calendar-grid-wrapper .month-view,
+.calendar-grid-wrapper .day-view,
+.calendar-grid-wrapper .week-view,
+.calendar-grid-wrapper .year-view {
+    display: none;
+    width: 100%;
+    height: 100%;
+    /* Ensure proper layout when active */
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Active views are fully visible */
+.calendar-grid-wrapper .month-view.active {
+    display: block;
+    z-index: 10;
+}
+
+.calendar-grid-wrapper .day-view.active {
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.calendar-grid-wrapper .week-view.active {
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.calendar-grid-wrapper .year-view.active {
+    display: block;
+    overflow-y: auto;
+    padding: 24px;
+    z-index: 10;
+}
+
+.day-header-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid #1f1f1f;
+    background: #000000;
+}
+
+.day-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.day-subtitle {
+    font-size: 14px;
+    color: #888888;
+    margin: 4px 0 0 0;
+}
+
+.time-grid {
+    flex: 1;
+    overflow-y: auto;
+    background: #000000;
+}
+
+.time-slot {
+    height: 60px;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    position: relative;
+}
+
+.time-label {
+    width: 80px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #666666;
+    border-right: 1px solid #1f1f1f;
+    display: flex;
+    align-items: flex-start;
+    background: #000000;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+.time-content {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.time-content:hover {
+    background: #0a0a0a;
+}
+
+.day-event {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    background: rgba(74, 105, 189, 0.8);
+    border: 1px solid #4a69bd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.day-event.work { 
+    background: rgba(231, 76, 60, 0.8);
+    border-color: #e74c3c;
+}
+
+.day-event.study { 
+    background: rgba(52, 152, 219, 0.8);
+    border-color: #3498db;
+}
+
+.day-event.personal { 
+    background: rgba(46, 204, 113, 0.8);
+    border-color: #2ecc71;
+}
+
+.day-event.health { 
+    background: rgba(243, 156, 18, 0.8);
+    border-color: #f39c12;
+}
+
+.day-event.other { 
+    background: rgba(155, 89, 182, 0.8);
+    border-color: #9b59b6;
+}
+
+.week-header {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    border-bottom: 1px solid #1f1f1f;
+    background: #000000;
+}
+
+.week-time-header {
+    background: #000000;
+    border-right: 1px solid #1f1f1f;
+}
+
+.week-day-header {
+    padding: 12px;
+    text-align: center;
+    border-right: 1px solid #1f1f1f;
+    background: #000000;
+}
+
+.week-day-header:last-child {
+    border-right: none;
+}
+
+.week-day-name {
+    font-size: 12px;
+    color: #666666;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.week-day-number {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.week-day-header.today .week-day-number {
+    color: #4a69bd;
+}
+
+.week-grid {
+    flex: 1;
+    overflow-y: auto;
+    background: #000000;
+}
+
+.week-time-row {
+    height: 60px;
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.week-time-cell {
+    border-right: 1px solid #1f1f1f;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.week-time-cell:hover {
+    background: #0a0a0a;
+}
+
+.week-time-cell:last-child {
+    border-right: none;
+}
+
+.year-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.year-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.year-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mini-month {
+    background: #0d0d0d;
+    border: 1px solid #1f1f1f;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mini-month:hover {
+    background: #1a1a1a;
+    border-color: #333333;
+}
+
+.mini-month-header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.mini-month-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.mini-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.mini-day-header {
+    text-align: center;
+    font-size: 10px;
+    color: #666666;
+    padding: 4px 2px;
+    text-transform: uppercase;
+}
+
+.mini-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #ffffff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.mini-day:hover {
+    background: #1f1f1f;
+}
+
+.mini-day.other-month {
+    color: #333333;
+}
+
+.mini-day.today {
+    background: #4a69bd;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.mini-day.has-events::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #4a69bd;
+}
+
+.mini-day.today.has-events::after {
+    background: #ffffff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 300px;
+    }
+    
+    .year-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-main {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: 40vh;
+        border-left: none;
+        border-top: 1px solid #1f1f1f;
+    }
+    
+    .calendar-section {
+        height: 60vh;
+    }
+    
+    .week-header {
+        grid-template-columns: 60px repeat(7, 1fr);
+    }
+    
+    .week-time-row {
+        grid-template-columns: 60px repeat(7, 1fr);
+    }
+    
+    .time-label {
+        width: 60px;
+        padding: 8px 8px;
+        font-size: 10px;
+    }
+    
+    .year-view {
+        padding: 16px;
+    }
+    
+    .year-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-main">
+    <!-- Calendar Section -->
+    <div class="calendar-section">
+        <!-- Top Header -->
+        <div class="top-header">
+            <h1 class="header-title">Calendar</h1>
+            <div class="header-controls">
+                <div class="view-switcher" role="tablist" aria-label="Calendar view options">
+                    <button class="view-btn" data-view="day" role="tab" aria-controls="day-view" id="day-tab">Day</button>
+                    <button class="view-btn" data-view="week" role="tab" aria-controls="week-view" id="week-tab">Week</button>
+                    <button class="view-btn active" data-view="month" role="tab" aria-controls="month-view" id="month-tab">Month</button>
+                    <button class="view-btn" data-view="year" role="tab" aria-controls="year-view" id="year-tab">Year</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="calendar-nav">
+            <div class="nav-left">
+                <div class="nav-arrows">
+                    <button class="nav-arrow" onclick="previousMonth()" title="Previous" id="prevBtn">‹</button>
+                    <button class="nav-arrow" onclick="nextMonth()" title="Next" id="nextBtn">›</button>
+                </div>
+                <h2 class="current-date" id="currentDate">January 2024</h2>
+            </div>
+        </div>
+
+        <!-- Calendar Views -->
+        <div class="calendar-grid-wrapper">
+            <!-- Debug indicator -->
+            <div id="debugIndicator" style="position: absolute; top: 10px; right: 10px; background: #4a69bd; color: white; padding: 8px; border-radius: 4px; z-index: 100; font-size: 12px;">
+                Month View Active
+            </div>
+            
+            <!-- Month Grid View (Default) -->
+            <div class="month-view active" id="month-view" role="tabpanel" aria-labelledby="month-tab">
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Day headers -->
+                    <div class="day-header">Sun</div>
+                    <div class="day-header">Mon</div>
+                    <div class="day-header">Tue</div>
+                    <div class="day-header">Wed</div>
+                    <div class="day-header">Thu</div>
+                    <div class="day-header">Fri</div>
+                    <div class="day-header">Sat</div>
+                    
+                    <!-- Calendar days will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Day View -->
+            <div class="day-view" id="day-view" role="tabpanel" aria-labelledby="day-tab">
+                <div class="day-header-section">
+                    <h2 class="day-title" id="dayTitle">Monday, December 18, 2023</h2>
+                    <p class="day-subtitle">Today</p>
+                </div>
+                <div class="time-grid" id="dayTimeGrid">
+                    <p style="color: #888; padding: 20px; text-align: center;">Day content will be generated here...</p>
+                </div>
+            </div>
+
+            <!-- Week View -->
+            <div class="week-view" id="week-view" role="tabpanel" aria-labelledby="week-tab">
+                <div class="week-header" id="weekHeader">
+                    <div class="week-time-header"></div>
+                    <p style="color: #888; padding: 20px;">Week headers will be generated here...</p>
+                </div>
+                <div class="week-grid" id="weekGrid">
+                    <p style="color: #888; padding: 20px; text-align: center;">Week content will be generated here...</p>
+                </div>
+            </div>
+
+            <!-- Year View -->
+            <div class="year-view" id="year-view" role="tabpanel" aria-labelledby="year-tab">
+                <div class="year-header">
+                    <h2 class="year-title" id="yearTitle">2023</h2>
+                </div>
+                <div class="year-grid" id="yearGrid">
+                    <p style="color: #888; padding: 20px; text-align: center;">Year content will be generated here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Today</h2>
+            <p class="selected-date" id="selectedDate">January 15, 2024</p>
+        </div>
+
+        <!-- Quick Add Form -->
+        <div class="quick-add">
+            <h3>Quick Add</h3>
+            <form id="quickAddForm">
+                <div class="form-group">
+                    <label for="eventTitle">Title</label>
+                    <input type="text" id="eventTitle" class="form-control" placeholder="Enter event title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="eventTime">Time</label>
+                    <input type="time" id="eventTime" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <div class="color-options">
+                        <div class="color-option work selected" data-category="work" title="Work"></div>
+                        <div class="color-option study" data-category="study" title="Study"></div>
+                        <div class="color-option personal" data-category="personal" title="Personal"></div>
+                        <div class="color-option health" data-category="health" title="Health"></div>
+                        <div class="color-option other" data-category="other" title="Other"></div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="add-btn">Add Event</button>
+            </form>
+        </div>
+
+        <!-- Events List -->
+        <div class="events-section">
+            <h3>Events & Tasks</h3>
+            <div id="eventsList">
+                <div class="no-events">No events for this day</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+console.log("Calendar script loading...");
+
+// Simple logging function
+function log(message) {
+    console.log("[Calendar] " + message);
+}
+
+// Current date for navigation
+let currentDate = new Date();
+let currentView = 'month';
+
+// Generate time slots for day/week views
+function generateTimeSlots() {
+    const slots = [];
+    for (let hour = 0; hour < 24; hour++) {
+        const time12 = hour === 0 ? '12 AM' : 
+                      hour < 12 ? `${hour} AM` : 
+                      hour === 12 ? '12 PM' : 
+                      `${hour - 12} PM`;
+        slots.push({
+            hour: hour,
+            time24: `${hour.toString().padStart(2, '0')}:00`,
+            time12: time12
+        });
+    }
+    return slots;
+}
+
+// Generate week view content
+function generateWeekView() {
+    log("generateWeekView() called");
+    const weekHeader = document.getElementById('weekHeader');
+    const weekGrid = document.getElementById('weekGrid');
+    
+    if (!weekHeader || !weekGrid) {
+        log("ERROR: Missing week view elements");
+        return;
+    }
+    
+    // Get start of week
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    
+    // Generate simple week header
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let headerHtml = '<div class="week-time-header"></div>';
+    
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+        const isToday = day.toDateString() === new Date().toDateString();
+        
+        headerHtml += `
+            <div class="week-day-header ${isToday ? 'today' : ''}">
+                <div class="week-day-name">${dayNames[i]}</div>
+                <div class="week-day-number">${day.getDate()}</div>
+            </div>
+        `;
+    }
+    
+    weekHeader.innerHTML = headerHtml;
+    
+    // Generate simple week grid
+    let gridHtml = '';
+    for (let hour = 8; hour < 18; hour++) {
+        const time12 = hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+        gridHtml += `
+            <div class="week-time-row">
+                <div class="time-label">${time12}</div>
+                ${Array.from({length: 7}, (_, dayIndex) => {
+                    let eventHtml = '';
+                    if (hour === 10 && dayIndex === 1) {
+                        eventHtml = '<div class="day-event work" style="top: 0; height: 30px;">Meeting</div>';
+                    }
+                    return `<div class="week-time-cell">${eventHtml}</div>`;
+                }).join('')}
+            </div>
+        `;
+    }
+    
+    weekGrid.innerHTML = gridHtml;
+    log("Week view content generated successfully");
+}
+
+// Generate day view content
+function generateDayView() {
+    log("generateDayView() called");
+    const dayTimeGrid = document.getElementById('dayTimeGrid');
+    const dayTitle = document.getElementById('dayTitle');
+    
+    if (!dayTimeGrid || !dayTitle) {
+        log("ERROR: Missing day view elements");
+        return;
+    }
+    
+    // Update title
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dayTitle.textContent = currentDate.toLocaleDateString('en-US', options);
+    
+    // Generate simple time slots
+    let html = '';
+    for (let hour = 8; hour < 18; hour++) {
+        const time12 = hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+        html += `
+            <div class="time-slot">
+                <div class="time-label">${time12}</div>
+                <div class="time-content">
+                    ${hour === 10 ? '<div class="day-event work" style="top: 5px; height: 40px;">Team Meeting</div>' : ''}
+                    ${hour === 14 ? '<div class="day-event personal" style="top: 10px; height: 35px;">Lunch Break</div>' : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    dayTimeGrid.innerHTML = html;
+    log("Day view content generated successfully");
+}
+
+// Generate year view content
+function generateYearView() {
+    log("generateYearView() called");
+    const yearGrid = document.getElementById('yearGrid');
+    const yearTitle = document.getElementById('yearTitle');
+    
+    if (!yearGrid || !yearTitle) {
+        log("ERROR: Missing year view elements");
+        return;
+    }
+    
+    // Update year title
+    yearTitle.textContent = currentDate.getFullYear();
+    
+    // Generate simple year grid
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    let html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">';
+    
+    monthNames.forEach((month, index) => {
+        html += `
+            <div class="mini-month">
+                <div class="mini-month-header">
+                    <h3 class="mini-month-name">${month}</h3>
+                </div>
+                <div style="text-align: center; color: #888; padding: 20px;">
+                    Calendar for ${month}
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    yearGrid.innerHTML = html;
+    log("Year view content generated successfully");
+}
+
+// Generate days for mini month calendar
+function generateMiniMonthDays(year, month) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    let days = '';
+    for (let i = 0; i < 42; i++) {
+        const day = new Date(startDate);
+        day.setDate(startDate.getDate() + i);
+        
+        const isCurrentMonth = day.getMonth() === month;
+        const isToday = day.toDateString() === new Date().toDateString();
+        
+        days += `<div class="mini-day ${!isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}">${day.getDate()}</div>`;
+    }
+    return days;
+}
+
+// Simple view switching function
+function switchView(view) {
+    log("=== Switching to view: " + view + " ===");
+    currentView = view;
+    
+    // Update button states
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+        if (btn.getAttribute('data-view') === view) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+            log("Activated button for: " + view);
+        }
+    });
+    
+    // Hide all views and show selected view
+    document.querySelectorAll('.month-view, .day-view, .week-view, .year-view').forEach(viewEl => {
+        viewEl.classList.remove('active');
+    });
+    
+    // Show selected view
+    const viewElement = document.querySelector(`.${view}-view`);
+    if (viewElement) {
+        viewElement.classList.add('active');
+        log("Added active to: " + viewElement.className);
+        
+        // Update debug indicator
+        const debugIndicator = document.getElementById('debugIndicator');
+        if (debugIndicator) {
+            debugIndicator.textContent = view.charAt(0).toUpperCase() + view.slice(1) + ' View Active';
+            debugIndicator.style.background = 
+                view === 'day' ? '#e74c3c' :
+                view === 'week' ? '#2ecc71' :
+                view === 'year' ? '#f39c12' : '#4a69bd';
+        }
+        
+        // Generate content
+        setTimeout(() => {
+            log("Generating content for: " + view);
+            switch(view) {
+                case 'day':
+                    generateDayView();
+                    break;
+                case 'week':
+                    generateWeekView();
+                    break;
+                case 'year':
+                    generateYearView();
+                    break;
+                case 'month':
+                    log("Month view doesn't need content generation");
+                    break;
+                default:
+                    log("Unknown view: " + view);
+            }
+        }, 50);
+    } else {
+        log("ERROR: View element not found: ." + view + "-view");
+    }
+}
+
+// Navigation functions
+function previousMonth() {
+    if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+    } else if (currentView === 'week') {
+        currentDate.setDate(currentDate.getDate() - 7);
+    } else if (currentView === 'day') {
+        currentDate.setDate(currentDate.getDate() - 1);
+    } else if (currentView === 'year') {
+        currentDate.setFullYear(currentDate.getFullYear() - 1);
+    }
+    switchView(currentView);
+    updateDateDisplay();
+}
+
+function nextMonth() {
+    if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    } else if (currentView === 'week') {
+        currentDate.setDate(currentDate.getDate() + 7);
+    } else if (currentView === 'day') {
+        currentDate.setDate(currentDate.getDate() + 1);
+    } else if (currentView === 'year') {
+        currentDate.setFullYear(currentDate.getFullYear() + 1);
+    }
+    switchView(currentView);
+    updateDateDisplay();
+}
+
+function updateDateDisplay() {
+    const currentDateEl = document.getElementById('currentDate');
+    if (!currentDateEl) return;
+    
+    let dateText = '';
+    switch(currentView) {
+        case 'day':
+            dateText = currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            break;
+        case 'week':
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            dateText = `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            break;
+        case 'year':
+            dateText = currentDate.getFullYear().toString();
+            break;
+        default:
+            dateText = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+    currentDateEl.textContent = dateText;
+}
+
+// Set up event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    log("=== DOM Ready - Setting up calendar ===");
+    
+    // Test element existence
+    const testElements = ['dayTimeGrid', 'dayTitle', 'weekGrid', 'weekHeader', 'yearGrid', 'yearTitle'];
+    testElements.forEach(id => {
+        const element = document.getElementById(id);
+        log(`Element ${id}: ${element ? 'FOUND' : 'NOT FOUND'}`);
+    });
+    
+    // Add click handlers to view buttons
+    document.querySelectorAll('.view-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            // Prevent any default behavior
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const view = this.getAttribute('data-view');
+            log("View button clicked: " + view);
+            
+            // Update aria-selected for accessibility
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.setAttribute('aria-selected', 'false');
+            });
+            this.setAttribute('aria-selected', 'true');
+            
+            switchView(view);
+            updateDateDisplay();
+        });
+        
+        // Initialize aria-selected
+        button.setAttribute('aria-selected', button.classList.contains('active') ? 'true' : 'false');
+    });
+    
+    log("Event listeners attached to " + document.querySelectorAll('.view-btn').length + " buttons");
+    
+    // Initialize month view
+    switchView('month');
+    updateDateDisplay();
+    
+    log("=== Calendar setup complete ===");
+});
+</script>
+{% endblock %}

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Test Calendar</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+        }
+        
+        .calendar-main {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .calendar-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-header {
+            height: 64px;
+            background: #000;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+        
+        .view-switcher {
+            display: flex;
+            background: #1f1f1f;
+            border-radius: 8px;
+            padding: 2px;
+        }
+        
+        .view-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            color: #888;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .view-btn.active {
+            background: #fff;
+            color: #000;
+        }
+        
+        .calendar-grid-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        /* Use display instead of opacity to avoid focus issues */
+        .view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        .content-area {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: #0d0d0d;
+            border-left: 1px solid #333;
+            padding: 20px;
+        }
+        
+        .debug-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4a69bd;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            z-index: 100;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-main">
+        <div class="calendar-section">
+            <div class="top-header">
+                <h1 style="margin: 0; font-size: 18px;">Calendar</h1>
+                <div class="view-switcher">
+                    <button class="view-btn active" data-view="month">Month</button>
+                    <button class="view-btn" data-view="day">Day</button>
+                    <button class="view-btn" data-view="week">Week</button>
+                    <button class="view-btn" data-view="year">Year</button>
+                </div>
+            </div>
+            
+            <div class="calendar-grid-wrapper">
+                <div class="debug-indicator" id="debugIndicator">Month View Active</div>
+                
+                <div class="view month-view active">
+                    <div class="content-area">
+                        <h3>Month View</h3>
+                        <p>Month calendar content here...</p>
+                    </div>
+                </div>
+                
+                <div class="view day-view">
+                    <div class="content-area">
+                        <h3>Day View</h3>
+                        <div id="dayContent">Day content will be generated here...</div>
+                    </div>
+                </div>
+                
+                <div class="view week-view">
+                    <div class="content-area">
+                        <h3>Week View</h3>
+                        <div id="weekContent">Week content will be generated here...</div>
+                    </div>
+                </div>
+                
+                <div class="view year-view">
+                    <div class="content-area">
+                        <h3>Year View</h3>
+                        <div id="yearContent">Year content will be generated here...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h3>Events & Tasks</h3>
+            <p>Sidebar content...</p>
+        </div>
+    </div>
+    
+    <script>
+        let currentView = 'month';
+        
+        function updateDebugIndicator(view) {
+            const indicator = document.getElementById('debugIndicator');
+            if (indicator) {
+                indicator.textContent = view.charAt(0).toUpperCase() + view.slice(1) + ' View Active';
+                indicator.style.background = 
+                    view === 'day' ? '#e74c3c' :
+                    view === 'week' ? '#2ecc71' :
+                    view === 'year' ? '#f39c12' : '#4a69bd';
+            }
+        }
+        
+        function generateContent(view) {
+            const contentElement = document.getElementById(`${view}Content`);
+            if (!contentElement) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            switch(view) {
+                case 'day':
+                    contentElement.innerHTML = `
+                        <h4>Daily Schedule</h4>
+                        <p>Generated at: ${timestamp}</p>
+                        <div style="margin-top: 20px;">
+                            <div style="margin-bottom: 10px; padding: 10px; background: rgba(74, 105, 189, 0.2); border-radius: 4px;">9:00 AM - Morning Meeting</div>
+                            <div style="margin-bottom: 10px; padding: 10px; background: rgba(46, 204, 113, 0.2); border-radius: 4px;">11:00 AM - Project Work</div>
+                            <div style="margin-bottom: 10px; padding: 10px; background: rgba(231, 76, 60, 0.2); border-radius: 4px;">2:00 PM - Client Call</div>
+                        </div>
+                    `;
+                    break;
+                case 'week':
+                    contentElement.innerHTML = `
+                        <h4>Weekly Overview</h4>
+                        <p>Generated at: ${timestamp}</p>
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px;">
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Sun</div>
+                                <div style="margin-top: 5px;">1</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Mon</div>
+                                <div style="margin-top: 5px;">2</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Tue</div>
+                                <div style="margin-top: 5px;">3</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Wed</div>
+                                <div style="margin-top: 5px;">4</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Thu</div>
+                                <div style="margin-top: 5px;">5</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Fri</div>
+                                <div style="margin-top: 5px;">6</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: #1a1a1a; border-radius: 4px;">
+                                <div style="font-weight: bold;">Sat</div>
+                                <div style="margin-top: 5px;">7</div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'year':
+                    contentElement.innerHTML = `
+                        <h4>Year 2023</h4>
+                        <p>Generated at: ${timestamp}</p>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px;">
+                            <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; text-align: center;">
+                                <div style="font-weight: bold; margin-bottom: 8px;">Q1</div>
+                                <div>Jan - Mar</div>
+                            </div>
+                            <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; text-align: center;">
+                                <div style="font-weight: bold; margin-bottom: 8px;">Q2</div>
+                                <div>Apr - Jun</div>
+                            </div>
+                            <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; text-align: center;">
+                                <div style="font-weight: bold; margin-bottom: 8px;">Q3</div>
+                                <div>Jul - Sep</div>
+                            </div>
+                            <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; text-align: center;">
+                                <div style="font-weight: bold; margin-bottom: 8px;">Q4</div>
+                                <div>Oct - Dec</div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        function switchView(view) {
+            console.log("Switching to view:", view);
+            currentView = view;
+            
+            // Update buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            
+            // Update views using display instead of opacity
+            document.querySelectorAll('.view').forEach(viewEl => {
+                const isActive = viewEl.classList.contains(`${view}-view`);
+                viewEl.classList.toggle('active', isActive);
+            });
+            
+            // Update debug indicator
+            updateDebugIndicator(view);
+            
+            // Generate content
+            if (view !== 'month') {
+                setTimeout(() => generateContent(view), 50);
+            }
+            
+            console.log("View switched to:", view);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Setting up calendar');
+            
+            // Add event listeners
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const view = this.dataset.view;
+                    switchView(view);
+                });
+            });
+            
+            console.log('Calendar ready');
+        });
+    </script>
+</body>
+</html>

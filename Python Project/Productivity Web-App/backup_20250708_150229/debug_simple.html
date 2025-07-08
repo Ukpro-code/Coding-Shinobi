@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Calendar View Switch</title>
+    <style>
+        body { background: #000; color: #fff; padding: 20px; font-family: Arial, sans-serif; }
+        .view-btn { padding: 10px 20px; margin: 5px; background: #333; color: #fff; border: none; cursor: pointer; }
+        .view-btn.active { background: #4a69bd; }
+        .view { display: none; padding: 20px; margin-top: 20px; border: 1px solid #333; }
+        .view.active { display: block; }
+        .debug { background: #222; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Calendar View Switch Debug</h1>
+    
+    <div class="debug" id="debugInfo">Debug info will appear here...</div>
+    
+    <div>
+        <button class="view-btn active" data-view="month">Month</button>
+        <button class="view-btn" data-view="day">Day</button>
+        <button class="view-btn" data-view="week">Week</button>
+        <button class="view-btn" data-view="year">Year</button>
+    </div>
+    
+    <div class="view month-view active">
+        <h3>Month View Content</h3>
+        <p>This is the month view.</p>
+    </div>
+    
+    <div class="view day-view">
+        <h3>Day View Content</h3>
+        <p>This is the day view.</p>
+    </div>
+    
+    <div class="view week-view">
+        <h3>Week View Content</h3>
+        <p>This is the week view.</p>
+    </div>
+    
+    <div class="view year-view">
+        <h3>Year View Content</h3>
+        <p>This is the year view.</p>
+    </div>
+    
+    <script>
+        function log(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML += '<br>' + message;
+            console.log(message);
+        }
+        
+        function switchView(view) {
+            log("Switching to view: " + view);
+            
+            // Update buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-view') === view) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update views
+            document.querySelectorAll('.view').forEach(viewEl => {
+                viewEl.classList.remove('active');
+                if (viewEl.classList.contains(view + '-view')) {
+                    viewEl.classList.add('active');
+                    log("Activated: " + view + "-view");
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log("DOM ready - setting up event listeners");
+            
+            // Test button existence
+            const buttons = document.querySelectorAll('.view-btn');
+            log("Found " + buttons.length + " buttons");
+            
+            // Add event listeners
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    log("Button clicked: " + view);
+                    switchView(view);
+                });
+            });
+            
+            log("Setup complete");
+        });
+    </script>
+</body>
+</html>

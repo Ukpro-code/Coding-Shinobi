@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Element ID Test</title>
+    <style>
+        body { background: #000; color: #fff; padding: 20px; }
+        .container { margin: 20px 0; }
+        button { padding: 10px; margin: 5px; }
+        #output { background: #333; padding: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Element ID Test</h1>
+    
+    <div class="container">
+        <button onclick="testElements()">Test Elements</button>
+        <button onclick="testGenerateFunctions()">Test Generate Functions</button>
+    </div>
+    
+    <!-- Mock elements with IDs from calendar -->
+    <div id="dayTimeGrid">Day Time Grid</div>
+    <div id="dayTitle">Day Title</div>
+    <div id="weekGrid">Week Grid</div>
+    <div id="weekHeader">Week Header</div>
+    <div id="yearGrid">Year Grid</div>
+    <div id="yearTitle">Year Title</div>
+    
+    <div id="output"></div>
+    
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        function testElements() {
+            log("=== Testing Elements ===");
+            
+            const elements = [
+                'dayTimeGrid', 'dayTitle', 'weekGrid', 'weekHeader', 'yearGrid', 'yearTitle'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                log(`${id}: ${element ? 'FOUND' : 'NOT FOUND'}`);
+            });
+        }
+        
+        // Mock generate functions from the calendar
+        function generateDayView() {
+            log("generateDayView() called");
+            const dayTimeGrid = document.getElementById('dayTimeGrid');
+            const dayTitle = document.getElementById('dayTitle');
+            
+            log("dayTimeGrid element: " + (dayTimeGrid ? 'FOUND' : 'NOT FOUND'));
+            log("dayTitle element: " + (dayTitle ? 'FOUND' : 'NOT FOUND'));
+            
+            if (!dayTimeGrid || !dayTitle) {
+                log("ERROR: Missing elements");
+                return;
+            }
+            
+            dayTitle.innerHTML = "Day View Generated!";
+            dayTimeGrid.innerHTML = "<p>Day content generated at " + new Date().toLocaleTimeString() + "</p>";
+            log("Day view content generated successfully");
+        }
+        
+        function generateWeekView() {
+            log("generateWeekView() called");
+            const weekHeader = document.getElementById('weekHeader');
+            const weekGrid = document.getElementById('weekGrid');
+            
+            log("weekHeader element: " + (weekHeader ? 'FOUND' : 'NOT FOUND'));
+            log("weekGrid element: " + (weekGrid ? 'FOUND' : 'NOT FOUND'));
+            
+            if (!weekHeader || !weekGrid) {
+                log("ERROR: Missing elements");
+                return;
+            }
+            
+            weekHeader.innerHTML = "Week Header Generated!";
+            weekGrid.innerHTML = "<p>Week content generated at " + new Date().toLocaleTimeString() + "</p>";
+            log("Week view content generated successfully");
+        }
+        
+        function generateYearView() {
+            log("generateYearView() called");
+            const yearGrid = document.getElementById('yearGrid');
+            const yearTitle = document.getElementById('yearTitle');
+            
+            log("yearGrid element: " + (yearGrid ? 'FOUND' : 'NOT FOUND'));
+            log("yearTitle element: " + (yearTitle ? 'FOUND' : 'NOT FOUND'));
+            
+            if (!yearGrid || !yearTitle) {
+                log("ERROR: Missing elements");
+                return;
+            }
+            
+            yearTitle.innerHTML = "Year View Generated!";
+            yearGrid.innerHTML = "<p>Year content generated at " + new Date().toLocaleTimeString() + "</p>";
+            log("Year view content generated successfully");
+        }
+        
+        function testGenerateFunctions() {
+            log("=== Testing Generate Functions ===");
+            generateDayView();
+            generateWeekView();
+            generateYearView();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log("DOM ready - page loaded");
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}NEW CALENDAR TEST{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Reset and base styles for full-window layout */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000000;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Main container - full viewport */
+.calendar-main {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: #000000;
+}
+
+/* Calendar section - left side */
+.calendar-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #000000;
+}
+
+/* Sidebar - right side */
+.sidebar {
+    width: 350px;
+    background: #0d0d0d;
+    border-left: 1px solid #1f1f1f;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Top navigation header */
+.top-header {
+    height: 64px;
+    background: #000000;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* View switcher */
+.view-switcher {
+    display: flex;
+    background: #1f1f1f;
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.view-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    color: #888888;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* ULTRA VISIBLE STYLING FOR DEBUGGING */
+    border: 3px solid lime !important;
+    background: magenta !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.view-btn.active {
+    background: yellow !important;
+    color: black !important;
+}
+
+.view-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Calendar views */
+.calendar-views {
+    flex: 1;
+    position: relative;
+    background: #000000;
+}
+
+.calendar-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    background: #000000;
+}
+
+.calendar-view.active {
+    display: block;
+}
+
+.month-view {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 40px repeat(6, 1fr);
+    gap: 1px;
+    background: #1f1f1f;
+    padding: 20px;
+}
+
+.day-header {
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.calendar-day {
+    background: #000000;
+    border: 1px solid #1f1f1f;
+    padding: 8px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.calendar-day:hover {
+    background: #1a1a1a;
+}
+
+.day-view, .week-view, .year-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #ffffff;
+}
+
+/* Sidebar styles */
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-main">
+    <!-- Calendar Section -->
+    <div class="calendar-section">
+        <!-- Top Header -->
+        <div class="top-header">
+            <h1 class="header-title">NEW CALENDAR WORKING!</h1>
+            <div class="header-controls">
+                <!-- GIANT TEST BUTTON -->
+                <button onclick="alert('🎉 BUTTONS WORK!')" style="background: red; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold;">🚨 CLICK ME! 🚨</button>
+                <div class="view-switcher">
+                    <button class="view-btn" data-view="day">Day</button>
+                    <button class="view-btn" data-view="week">Week</button>
+                    <button class="view-btn active" data-view="month">Month</button>
+                    <button class="view-btn" data-view="year">Year</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Views -->
+        <div class="calendar-views">
+            <!-- Month View (Default) -->
+            <div class="calendar-view month-view active" id="monthView">
+                <div class="day-header">Sun</div>
+                <div class="day-header">Mon</div>
+                <div class="day-header">Tue</div>
+                <div class="day-header">Wed</div>
+                <div class="day-header">Thu</div>
+                <div class="day-header">Fri</div>
+                <div class="day-header">Sat</div>
+                
+                <!-- Sample days -->
+                <div class="calendar-day">1</div>
+                <div class="calendar-day">2</div>
+                <div class="calendar-day">3</div>
+                <div class="calendar-day">4</div>
+                <div class="calendar-day">5</div>
+                <div class="calendar-day">6</div>
+                <div class="calendar-day">7</div>
+                <div class="calendar-day">8</div>
+                <div class="calendar-day">9</div>
+                <div class="calendar-day">10</div>
+                <div class="calendar-day">11</div>
+                <div class="calendar-day">12</div>
+                <div class="calendar-day">13</div>
+                <div class="calendar-day">14</div>
+                <div class="calendar-day">15</div>
+                <div class="calendar-day">16</div>
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+                <div class="calendar-day">21</div>
+                <div class="calendar-day">22</div>
+                <div class="calendar-day">23</div>
+                <div class="calendar-day">24</div>
+                <div class="calendar-day">25</div>
+                <div class="calendar-day">26</div>
+                <div class="calendar-day">27</div>
+                <div class="calendar-day">28</div>
+                <div class="calendar-day">29</div>
+                <div class="calendar-day">30</div>
+                <div class="calendar-day">31</div>
+            </div>
+
+            <!-- Day View -->
+            <div class="calendar-view day-view" id="dayView">
+                🌅 DAY VIEW ACTIVE! 🌅
+            </div>
+
+            <!-- Week View -->
+            <div class="calendar-view week-view" id="weekView">
+                📅 WEEK VIEW ACTIVE! 📅
+            </div>
+
+            <!-- Year View -->
+            <div class="calendar-view year-view" id="yearView">
+                🗓️ YEAR VIEW ACTIVE! 🗓️
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">NEW CALENDAR IS WORKING!</h2>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+console.log("🎉 NEW CALENDAR SCRIPT LOADED!");
+
+// GIANT TEST TO CONFIRM JAVASCRIPT IS WORKING
+document.body.style.border = "10px solid lime";
+setTimeout(() => {
+    document.body.style.border = "none";
+}, 2000);
+
+// Ultra-simple view switching function
+function switchView(view) {
+    console.log("🔥 SWITCHING TO:", view);
+    alert("🚀 SWITCHING TO: " + view.toUpperCase());
+    
+    // Hide all views
+    document.querySelectorAll('.calendar-view').forEach(v => {
+        v.classList.remove('active');
+    });
+    
+    // Show the selected view
+    const viewMap = {
+        'day': 'dayView',
+        'week': 'weekView',
+        'month': 'monthView',
+        'year': 'yearView'
+    };
+    
+    const targetId = viewMap[view];
+    if (targetId) {
+        document.getElementById(targetId).classList.add('active');
+        console.log("✅ Activated:", targetId);
+    }
+    
+    // Update button states
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-view') === view) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+// Set up event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("🚀 DOM READY - Setting up buttons");
+    
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        const view = btn.getAttribute('data-view');
+        console.log("Setting up button:", view);
+        
+        btn.addEventListener('click', function() {
+            console.log("Button clicked:", view);
+            switchView(view);
+        });
+    });
+    
+    console.log("✅ All event listeners set up!");
+});
+
+console.log("✅ NEW CALENDAR SCRIPT COMPLETE!");
+</script>
+{% endblock %}

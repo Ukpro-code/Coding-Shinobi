@@ -18,6 +18,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dashboard.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Force template reloading for development
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
 db = SQLAlchemy(app)
 
 # Database Models
@@ -287,8 +290,19 @@ def delete_task(task_id):
     
     return redirect(url_for('tasks'))
 
+@app.route('/test-js')
+def test_js():
+    """Test JavaScript functionality"""
+    return render_template('js_test.html')
+
 @app.route('/calendar')
 def calendar():
+    """Main calendar route - redirect to grid view by default"""
+    return redirect(url_for('calendar_grid'))
+
+@app.route('/calendar/list')
+def calendar_list():
+    """List view for calendar events"""
     try:
         # Get local events from database
         local_events = Event.query.order_by(Event.start_date.desc()).all()
@@ -834,6 +848,135 @@ def get_motivational_quote():
     import random
     random_quote = random.choice(quotes)
     return jsonify(random_quote)
+
+@app.route('/calendar/grid')
+def calendar_grid():
+    """Enhanced calendar view with month grid layout"""
+    try:
+        # Get month and year from query params or use current
+        month = request.args.get('month', type=int, default=datetime.utcnow().month)
+        year = request.args.get('year', type=int, default=datetime.utcnow().year)
+        
+        # Ensure valid month/year
+        if month < 1 or month > 12:
+            month = datetime.utcnow().month
+        if year < 1900 or year > 2100:
+            year = datetime.utcnow().year
+        
+        # Get the first day of the month and calculate calendar grid
+        first_day = datetime(year, month, 1)
+        
+        # Get the Monday of the week containing the first day
+        start_date = first_day - timedelta(days=first_day.weekday() + 1)  # Start on Sunday
+        if first_day.weekday() == 6:  # If first day is Sunday
+            start_date = first_day
+        
+        # Calculate date range for the calendar grid (6 weeks)
+        
+        # Get events for the month (with some buffer for neighboring days)
+        start_query = start_date
+        end_query = start_date + timedelta(days=42)  # 6 weeks
+        
+        # Get local events
+        local_events = Event.query.filter(
+            Event.start_date >= start_query,
+            Event.start_date < end_query
+        ).all()
+        
+        # Get Google Calendar events if enabled
+        google_events = []
+        if GOOGLE_CALENDAR_ENABLED and google_calendar:
+            try:
+                events_data, _ = google_calendar.get_events(
+                    max_results=50,
+                    time_min=start_query.isoformat() + 'Z',
+                    time_max=end_query.isoformat() + 'Z'
+                )
+                if events_data:
+                    google_events = events_data
+            except Exception:
+                pass  # Silently handle Google Calendar errors
+        
+        # Create calendar weeks structure
+        calendar_weeks = []
+        current_date = start_date
+        today = datetime.utcnow().date()
+        
+        for week in range(6):  # 6 weeks to cover all possible month layouts
+            week_days = []
+            for day in range(7):  # 7 days per week
+                day_info = {
+                    'date': current_date,
+                    'is_today': current_date.date() == today,
+                    'other_month': current_date.month != month,
+                    'events': []
+                }
+                
+                # Find events for this day
+                day_start = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                day_end = day_start + timedelta(days=1)
+                
+                # Add local events
+                for event in local_events:
+                    if day_start <= event.start_date < day_end:
+                        day_info['events'].append({
+                            'id': event.id,
+                            'title': event.title,
+                            'start_time': event.start_date.strftime('%H:%M'),
+                            'source': 'local',
+                            'css_class': ''
+                        })
+                
+                # Add Google Calendar events
+                for event in google_events:
+                    event_start = event['start_date']
+                    if day_start <= event_start < day_end:
+                        day_info['events'].append({
+                            'id': event.get('id', ''),
+                            'title': event['title'],
+                            'start_time': event_start.strftime('%H:%M'),
+                            'source': 'google_calendar',
+                            'css_class': 'google'
+                        })
+                
+                # Sort events by time
+                day_info['events'].sort(key=lambda x: x['start_time'])
+                
+                week_days.append(day_info)
+                current_date += timedelta(days=1)
+            
+            calendar_weeks.append(week_days)
+        
+        # Month name for display
+        month_names = [
+            '', 'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ]
+        current_month_year = f"{month_names[month]} {year}"
+        
+        return render_template('calendar_grid.html',
+                             calendar_weeks=calendar_weeks,
+                             current_month=month,
+                             current_year=year,
+                             current_month_year=current_month_year,
+                             google_calendar_enabled=GOOGLE_CALENDAR_ENABLED)
+    
+    except Exception as e:
+        flash(f'Error loading calendar grid: {str(e)}', 'error')
+        return redirect(url_for('calendar'))
+
+@app.route('/events/<int:event_id>/delete', methods=['POST'])
+def delete_event(event_id):
+    try:
+        event = Event.query.get_or_404(event_id)
+        db.session.delete(event)
+        db.session.commit()
+        flash('Event deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting event: {str(e)}', 'error')
+    
+    return redirect(url_for('calendar'))
 
 # Database initialization
 def create_tables():

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Standalone JS Test</title>
+</head>
+<body>
+    <h1>Standalone JavaScript Test</h1>
+    <button onclick="testFunction()">Click Me</button>
+    <div id="output"></div>
+    
+    <script>
+        console.log("Script is loading...");
+        
+        // Change background immediately
+        document.body.style.backgroundColor = "#ffcccc";
+        
+        // Add text to show JS is working
+        document.getElementById('output').innerHTML = '<p style="color: red; font-weight: bold;">✅ JavaScript is working!</p>';
+        
+        function testFunction() {
+            document.getElementById('output').innerHTML += '<p>Button was clicked!</p>';
+            document.querySelector('button').style.backgroundColor = 'green';
+        }
+        
+        console.log("Script loaded successfully");
+    </script>
+</body>
+</html>
