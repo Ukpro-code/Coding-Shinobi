@@ -3,6 +3,8 @@ import os
 import glob
 import multiprocessing
 import psutil
+from datetime import datetime
+import re
 
 username = "ukprowork"
 password = "5b-G5s.*s4hPqEn"
@@ -22,6 +24,68 @@ for file in glob.glob("fundsquare_loggedin_*.html"):
         print(f"Deleted old file: {file}")
     except Exception as e:
         print(f"Could not delete {file}: {e}")
+
+def parse_date_string(date_str):
+    """
+    Parse various date formats and return a datetime object.
+    Returns None if parsing fails.
+    """
+    if not date_str or date_str.strip() == "-" or "unavailable" in date_str.lower():
+        return None
+    
+    # Clean the date string
+    date_str = date_str.strip()
+    
+    # Common date patterns
+    date_patterns = [
+        r'(\d{1,2})[/-](\d{1,2})[/-](\d{4})',  # DD/MM/YYYY or DD-MM-YYYY
+        r'(\d{4})[/-](\d{1,2})[/-](\d{1,2})',  # YYYY/MM/DD or YYYY-MM-DD
+        r'(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})',  # DD Mon YYYY
+        r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),?\s+(\d{4})',  # Mon DD, YYYY
+    ]
+    
+    month_map = {
+        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+        'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+    }
+    
+    for pattern in date_patterns:
+        match = re.search(pattern, date_str, re.IGNORECASE)
+        if match:
+            try:
+                if pattern == date_patterns[0]:  # DD/MM/YYYY
+                    day, month, year = match.groups()
+                    return datetime(int(year), int(month), int(day))
+                elif pattern == date_patterns[1]:  # YYYY/MM/DD
+                    year, month, day = match.groups()
+                    return datetime(int(year), int(month), int(day))
+                elif pattern == date_patterns[2]:  # DD Mon YYYY
+                    day, month_str, year = match.groups()
+                    month = month_map[month_str.capitalize()]
+                    return datetime(int(year), month, int(day))
+                elif pattern == date_patterns[3]:  # Mon DD, YYYY
+                    month_str, day, year = match.groups()
+                    month = month_map[month_str.capitalize()]
+                    return datetime(int(year), month, int(day))
+            except (ValueError, KeyError):
+                continue
+    
+    return None
+
+def calculate_years_difference(start_date_str, end_date_str):
+    """
+    Calculate the difference in years between two date strings.
+    Returns the difference as a float, or None if calculation fails.
+    """
+    start_date = parse_date_string(start_date_str)
+    end_date = parse_date_string(end_date_str)
+    
+    if start_date is None or end_date is None:
+        return None
+    
+    # Calculate difference in years (including fractional years)
+    years_diff = (end_date - start_date).days / 365.25
+    return round(years_diff, 2)
 
 def scrape_batch(url_batch, username, password, chrome_binary_path, chromedriver_path):
     from selenium import webdriver
@@ -226,6 +290,10 @@ def scrape_batch(url_batch, username, password, chrome_binary_path, chromedriver
             legal_advisor = extract_legal_advisor()
             last_nav = extract_last_nav()
             nav_calc_frequency = extract_nav_calc_frequency(driver, wait)
+            
+            # Calculate time series - years between fund creation and last NAV
+            fund_age_years = calculate_years_difference(fund_creation_date, last_nav)
+            
             exec_time = round(time.time() - start_time, 2)
             results.append({
                 'URL': url,
@@ -241,6 +309,7 @@ def scrape_batch(url_batch, username, password, chrome_binary_path, chromedriver
                 'Fund Creation date': fund_creation_date,
                 'Last NAV': last_nav,
                 'NAV calculation frequency': nav_calc_frequency,
+                'Fund Age (Years)': fund_age_years,
                 'Execution time (s)': exec_time
             })
             print(f"✅ Scraped page for {url} in {exec_time}s.")
