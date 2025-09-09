@@ -1,0 +1,799 @@
+/* ZettleLearning - Exact ZettleMind Color Scheme */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  background: #000000;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.zettle-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Header - Exact ZettleMind Style */
+.zettle-header {
+  height: 60px;
+  background: #000000;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  justify-content: space-between;
+  z-index: 1000;
+}
+
+.zettle-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.brand-icon {
+  font-size: 20px;
+  color: #4A9EFF;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-subtitle {
+  font-size: 12px;
+  color: #888888;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.zettle-search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 30px;
+}
+
+.search-input {
+  width: 100%;
+  height: 32px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 16px;
+  padding: 0 14px;
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  background: #333333;
+  border-color: #4A9EFF;
+}
+
+.search-input::placeholder {
+  color: #666666;
+}
+
+.zettle-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-btn {
+  height: 28px;
+  padding: 0 10px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #cccccc;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background: #333333;
+  border-color: #4a4a4a;
+}
+
+.close-btn {
+  width: 28px;
+  height: 28px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #cccccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.close-btn:hover {
+  background: #444444;
+}
+
+/* Main Layout */
+.zettle-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Sidebar - ZettleMind Style */
+.zettle-sidebar {
+  width: 250px;
+  background: #000000;
+  border-right: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 16px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.section-header {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888888;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Activity List */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.activity-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.activity-meta {
+  font-size: 10px;
+  color: #666666;
+}
+
+.activity-time {
+  font-size: 10px;
+  color: #555555;
+}
+
+/* Sources List */
+.sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.source-item:hover {
+  background: #2a2a2a;
+}
+
+.source-item.active {
+  background: #2a2a2a;
+}
+
+.source-icon {
+  font-size: 14px;
+  color: #888888;
+}
+
+.source-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.source-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: #cccccc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-meta {
+  font-size: 10px;
+  color: #666666;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 6px;
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 9px;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Empty States */
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.empty-text {
+  color: #666666;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.empty-subtext {
+  color: #444444;
+  font-size: 10px;
+}
+
+/* Welcome Message for Empty Canvas */
+.welcome-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 5;
+}
+
+.welcome-content {
+  background: rgba(26, 26, 26, 0.9);
+  border: 1px solid #333333;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 400px;
+}
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.welcome-subtitle {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Content Area */
+.zettle-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000000;
+}
+
+/* Knowledge Graph - Exact ZettleMind Style */
+.knowledge-graph {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000000;
+}
+
+.graph-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.graph-svg {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* Connection Lines - Exact Match */
+.connection-line {
+  stroke: #404040;
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+/* Concept Bubbles - Exact ZettleMind Style */
+.concept-bubble {
+  fill: #ffffff;
+  stroke: #d0d0d0;
+  stroke-width: 1;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+}
+
+.concept-bubble:hover {
+  fill: #ffffff;
+  stroke: #b0b0b0;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.concept-bubble.selected {
+  fill: #ffffff;
+  stroke: #888888;
+  stroke-width: 2;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* Concept Labels - Black Text on White Bubbles */
+.concept-label {
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  font-size: 9px;
+  fill: #1a1a1a;
+}
+
+/* Upload Overlay */
+.upload-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.upload-area {
+  background: #1a1a1a;
+  border: 2px dashed #404040;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  max-width: 350px;
+}
+
+.upload-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  color: #666666;
+}
+
+.upload-area h3 {
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.upload-area p {
+  font-size: 12px;
+  color: #888888;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-btn, .demo-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #4A9EFF;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 2px;
+  text-decoration: none;
+}
+
+.upload-btn:hover, .demo-btn:hover {
+  background: #3d8ce6;
+}
+
+.demo-btn {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+}
+
+.demo-btn:hover {
+  background: #333333;
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+/* PDF Learning Mode */
+.pdf-learning-mode {
+  display: flex;
+  height: 100%;
+}
+
+.pdf-viewer {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pdf-header {
+  height: 50px;
+  background: rgba(15, 15, 15, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  justify-content: space-between;
+}
+
+.pdf-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pdf-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.pdf-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-btn {
+  height: 28px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: rgba(77, 172, 254, 0.2);
+  border-color: rgba(77, 172, 254, 0.4);
+  color: #4facfe;
+}
+
+.page-input {
+  width: 60px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 11px;
+  text-align: center;
+  outline: none;
+}
+
+.pdf-content {
+  flex: 1;
+  background: #f5f5f5;
+}
+
+.pdf-iframe, .pdf-object, .pdf-embed {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.pdf-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: rgba(20, 20, 20, 0.9);
+  color: #ffffff;
+  gap: 16px;
+}
+
+/* Notes Panel */
+.notes-panel {
+  flex: 1;
+  background: rgba(15, 15, 15, 0.8);
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.notes-header {
+  height: 50px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.notes-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.notes-count {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.note-composer {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.note-textarea {
+  width: 100%;
+  min-height: 80px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  margin-bottom: 12px;
+}
+
+.note-textarea:focus {
+  border-color: rgba(77, 172, 254, 0.5);
+  box-shadow: 0 0 0 3px rgba(77, 172, 254, 0.1);
+}
+
+.note-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.add-note-btn {
+  width: 100%;
+  height: 36px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-note-btn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+.add-note-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(77, 172, 254, 0.3);
+}
+
+.notes-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.empty-notes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.note-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.note-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.note-page {
+  background: rgba(77, 172, 254, 0.1);
+  color: #4facfe;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.delete-note-btn {
+  width: 20px;
+  height: 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 50%;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.delete-note-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.note-content {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.note-meta {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .zettle-sidebar {
+    width: 240px;
+  }
+  
+  .notes-panel {
+    min-width: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .zettle-search {
+    margin: 0 20px;
+  }
+  
+  .zettle-sidebar {
+    width: 200px;
+  }
+  
+  .pdf-learning-mode {
+    flex-direction: column;
+  }
+  
+  .notes-panel {
+    max-width: none;
+    min-width: auto;
+    height: 300px;
+  }
+}
