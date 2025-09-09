@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, ChevronDown, FileText, Video, BookOpen, Link, Clock, TrendingUp, Plus, Upload, Brain } from 'lucide-react'
+import { ChevronRight, ChevronDown, FileText, Video, BookOpen, Link, Clock, TrendingUp, FolderOpen } from 'lucide-react'
 import { Button } from './ui/button'
 import { ScrollArea } from './ui/scroll-area'
 import { Badge } from './ui/badge'
@@ -32,12 +32,13 @@ interface SidebarProps {
   setSelectedNode: (node: Node | null) => void
   onConceptsExtracted?: (concepts: ExtractedConcept[]) => void
   nodes?: Node[]
+  onOpenPDFReader?: () => void
+  onOpenDocumentManager?: () => void
 }
 
-export function Sidebar({ selectedNode, setSelectedNode, onConceptsExtracted, nodes = [] }: SidebarProps) {
+export function Sidebar({ selectedNode, setSelectedNode, onConceptsExtracted, nodes = [], onOpenPDFReader, onOpenDocumentManager }: SidebarProps) {
   const [expandedSections, setExpandedSections] = useState<string[]>(['recent', 'sources'])
   const [showPDFProcessor, setShowPDFProcessor] = useState(false)
-  const [showAddContent, setShowAddContent] = useState(false)
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -72,74 +73,25 @@ export function Sidebar({ selectedNode, setSelectedNode, onConceptsExtracted, no
   return (
     <div className="w-80 zettlemind-sidebar flex flex-col">
       <ScrollArea className="flex-1 p-4">
-        {/* Add Content Section */}
-        <div className="mb-6">
+        {/* PDF Reader Section */}
+        <div className="mb-6 space-y-2">
           <Button
-            variant="ghost"
-            onClick={() => setShowAddContent(!showAddContent)}
-            className="w-full justify-start p-0 h-auto zettlemind-button-secondary"
+            variant="outline"
+            onClick={onOpenPDFReader}
+            className="w-full justify-start bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
           >
-            {showAddContent ? (
-              <ChevronDown className="w-4 h-4 mr-2" />
-            ) : (
-              <ChevronRight className="w-4 h-4 mr-2" />
-            )}
-            <span className="font-medium">Add Content</span>
+            <FileText className="w-4 h-4 mr-2" />
+            <span className="font-medium">Open PDF Reader</span>
           </Button>
-
-          <AnimatePresence>
-            {showAddContent && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-3 space-y-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      console.log('Upload PDF clicked, setting showPDFProcessor to true')
-                      setShowPDFProcessor(true)
-                    }}
-                    className="w-full justify-start text-white/70 dark:text-white/70 light:text-slate-600 hover:text-white dark:hover:text-white light:hover:text-slate-800 hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-slate-100"
-                    size="sm"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Upload PDF
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-white/70 dark:text-white/70 light:text-slate-600 hover:text-white dark:hover:text-white light:hover:text-slate-800 hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-slate-100"
-                    size="sm"
-                    disabled
-                  >
-                    <Video className="w-4 h-4 mr-2" />
-                    YouTube Link (Soon)
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-white/70 dark:text-white/70 light:text-slate-600 hover:text-white dark:hover:text-white light:hover:text-slate-800 hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-slate-100"
-                    size="sm"
-                    disabled
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    eBook Upload (Soon)
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-white/70 dark:text-white/70 light:text-slate-600 hover:text-white dark:hover:text-white light:hover:text-slate-800 hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-slate-100"
-                    size="sm"
-                    disabled
-                  >
-                    <Link className="w-4 h-4 mr-2" />
-                    Web Article (Soon)
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          
+          <Button
+            variant="outline"
+            onClick={onOpenDocumentManager}
+            className="w-full justify-start bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20 hover:text-green-300"
+          >
+            <FolderOpen className="w-4 h-4 mr-2" />
+            <span className="font-medium">Document Manager</span>
+          </Button>
         </div>
 
         {/* PDF Processor Modal */}
