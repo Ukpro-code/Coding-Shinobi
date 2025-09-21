@@ -1,4 +1,4 @@
-/* ZettleLearning - Exact ZettleMind Color Scheme */
+/* ZettleLearning - Enhanced with Backend Integration */
 
 * {
   box-sizing: border-box;
@@ -15,17 +15,8 @@
   overflow: hidden;
 }
 
-.zettle-container {
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #000000;
-  color: #ffffff;
-}
-
-/* Header - Exact ZettleMind Style */
-.zettle-header {
+/* Enhanced App Header */
+.app-header {
   height: 60px;
   background: #000000;
   border-bottom: 1px solid #1a1a1a;
@@ -36,7 +27,13 @@
   z-index: 1000;
 }
 
-.zettle-brand {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -45,14 +42,481 @@
   color: #ffffff;
 }
 
-.brand-icon {
+.app-icon {
   font-size: 20px;
   color: #4A9EFF;
-  width: 20px;
-  height: 20px;
+}
+
+.user-info {
+  color: #888;
+  font-size: 14px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background: #b91c1c;
+}
+
+/* Content Library */
+.content-library {
+  margin: 20px 0;
+}
+
+.library-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.library-header h3 {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.library-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.library-search,
+.library-filter,
+.library-sort {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 12px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.library-search {
+  flex: 2;
+}
+
+.library-search::placeholder {
+  color: #666;
+}
+
+.content-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.content-item {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.2s;
+}
+
+.content-item:hover {
+  background: #1a1a1a;
+}
+
+.content-main {
+  flex: 1;
+  cursor: pointer;
+}
+
+.content-title {
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.content-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.content-type {
+  color: #4A9EFF;
+  background: #1a2332;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.content-status {
+  color: #10b981;
+  background: #0f2419;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.content-date {
+  color: #888;
+  padding: 2px 6px;
+}
+
+.delete-content-btn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.delete-content-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.empty-library {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.empty-library .empty-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.content-status {
+  color: #10b981;
+  background: #0d2818;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Enhanced Upload Section */
+.upload-section h3 {
+  color: #fff;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.error-message {
+  background: #dc2626;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.upload-zone {
+  border: 2px dashed #333;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.upload-zone:hover {
+  border-color: #4A9EFF;
+}
+
+.file-input {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.upload-text {
+  color: #888;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* Keep existing styles */
+.zettle-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  color: #ffffff;
+}
+
+.zettle-app {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  color: #ffffff;
+}
+
+.main-interface {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+.left-panel {
+  width: 350px;
+  background: #0a0a0a;
+  border-right: 1px solid #1a1a1a;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.main-content {
+  flex: 1;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-screen {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+}
+
+.welcome-content h1 {
+  color: #fff;
+  margin-bottom: 16px;
+  font-size: 32px;
+}
+
+.welcome-content p {
+  color: #888;
+  margin-bottom: 32px;
+  font-size: 16px;
+}
+
+.feature-highlights {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.feature-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+/* PDF Study Area */
+.pdf-study-area {
+  display: flex;
+  height: 100%;
+}
+
+.pdf-viewer-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-header {
+  background: #111;
+  padding: 12px 20px;
+  border-bottom: 1px solid #222;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pdf-title {
+  color: #fff;
+  font-weight: 500;
+}
+
+.pdf-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.pdf-controls button {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.close-pdf-btn {
+  background: #dc2626 !important;
+}
+
+.pdf-content {
+  flex: 1;
+  background: #222;
+}
+
+.notes-panel {
+  width: 350px;
+  background: #0a0a0a;
+  border-left: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-header {
+  padding: 20px;
+  border-bottom: 1px solid #222;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notes-header h3 {
+  color: #fff;
+  font-size: 16px;
+}
+
+.notes-count {
+  color: #888;
+  font-size: 14px;
+}
+
+.note-composer {
+  padding: 20px;
+  border-bottom: 1px solid #222;
+}
+
+.note-textarea {
+  width: 100%;
+  min-height: 80px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 12px;
+  color: #fff;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.note-composer-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-input {
+  width: 60px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.add-note-btn {
+  flex: 1;
+  background: #4A9EFF;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.add-note-btn:disabled {
+  background: #333;
+  cursor: not-allowed;
+}
+
+.notes-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.empty-notes {
+  text-align: center;
+  color: #666;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.note-item {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.note-page {
+  color: #4A9EFF;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.delete-note-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.delete-note-btn:hover {
+  color: #dc2626;
+}
+
+.note-content {
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.note-meta {
+  color: #666;
+  font-size: 11px;
 }
 
 .brand-subtitle {
