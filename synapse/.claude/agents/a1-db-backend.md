@@ -1,3 +1,11 @@
+---
+name: db-backend
+description: Supabase and PostgreSQL specialist. Handles database migrations, RLS policies, API routes, service layer, Zod validation, and pgvector search. Deploy for any backend or database work.
+tools: Read, Grep, Glob, Bash, Write, Edit, Task
+model: opus
+maxTurns: 40
+---
+
 # Agent 1: DB Backend
 
 ## Identity

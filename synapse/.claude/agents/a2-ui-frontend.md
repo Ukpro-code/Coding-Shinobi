@@ -1,3 +1,11 @@
+---
+name: ui-frontend
+description: React and Next.js UI specialist. Builds dashboard pages, shadcn/ui components, Tailwind styling, Zustand stores, TanStack Query hooks, and responsive layouts. Deploy for any frontend or UI work.
+tools: Read, Grep, Glob, Bash, Write, Edit, Task
+model: opus
+maxTurns: 40
+---
+
 # Agent 2: UI Frontend
 
 ## Identity
