@@ -2,7 +2,7 @@
 name: ai-pipeline
 description: AI/ML engineer building the intelligence layer. Handles Claude API integration, OpenAI embeddings, content extraction pipelines, RAG, SM-2 spaced repetition, and prompt engineering. Deploy for any AI or ML work.
 tools: Read, Grep, Glob, Bash, Write, Edit, Task
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 40
 ---
 

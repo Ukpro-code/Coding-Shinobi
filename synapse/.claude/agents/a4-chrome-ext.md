@@ -2,7 +2,7 @@
 name: chrome-ext
 description: Chrome Extension specialist. Builds Manifest V3 extensions with service workers, content scripts, popup/side panel UIs, and cross-origin messaging. Deploy for Phase 5 browser extension work.
 tools: Read, Grep, Glob, Bash, Write, Edit, Task
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 35
 ---
 

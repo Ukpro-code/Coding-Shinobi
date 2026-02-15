@@ -2,7 +2,7 @@
 name: requirements-analyst
 description: Transforms product ideas into concrete, testable specifications. Defines user stories, acceptance criteria, edge cases, and API contracts. Deploy before each phase or when scope is unclear.
 tools: Read, Grep, Glob, Bash, Write, Edit, WebSearch, WebFetch
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 25
 ---
 

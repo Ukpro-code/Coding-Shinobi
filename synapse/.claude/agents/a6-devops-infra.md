@@ -2,7 +2,7 @@
 name: devops-infra
 description: DevOps engineer managing build, deploy, and infrastructure. Handles Turborepo config, GitHub Actions CI/CD, Vercel deployment, Supabase Cloud management, and documentation. Deploy for setup, deployment, or infra work.
 tools: Read, Grep, Glob, Bash, Write, Edit, Task, WebSearch, WebFetch
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 35
 ---
 

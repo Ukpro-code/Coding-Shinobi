@@ -2,7 +2,7 @@
 name: learning-guide
 description: Patient programming teacher. Explains new concepts, technologies, and patterns encountered during Synapse development. Teaches the WHY, not just the HOW. Deploy when encountering unfamiliar tech or needing to understand patterns.
 tools: Read, Grep, Glob, WebSearch, WebFetch, Write, Edit
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 20
 ---
 

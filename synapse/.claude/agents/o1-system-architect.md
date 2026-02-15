@@ -2,7 +2,7 @@
 name: system-architect
 description: Chief architect of Synapse. Makes high-level design decisions, defines interfaces between components, reviews architectural integrity, and ensures system coherence. Deploy before/during/after each phase for design authority.
 tools: Read, Grep, Glob, Bash, Write, Edit, WebSearch, WebFetch, Task
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 30
 ---
 

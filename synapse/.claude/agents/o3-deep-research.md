@@ -2,7 +2,7 @@
 name: deep-research
 description: Deep research specialist. Investigates technical problems, evaluates libraries, benchmarks alternatives, and provides evidence-based recommendations. Deploy before tech decisions or when stuck on hard problems.
 tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, Write, Edit
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 25
 ---
 

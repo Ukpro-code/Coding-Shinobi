@@ -2,7 +2,7 @@
 name: qa-testing
 description: QA engineer ensuring quality and reliability. Writes Vitest unit tests, Playwright E2E tests, security audits, performance profiling, and refactoring suggestions. Deploy at the end of every phase.
 tools: Read, Grep, Glob, Bash, Write, Edit, Task
-model: opus
+model: inherit # Use the default model configured for the workspace
 maxTurns: 40
 ---
 
